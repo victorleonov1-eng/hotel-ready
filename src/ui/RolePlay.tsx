@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Scenario, ScoreResult, Recording, Message as TypeMessage } from '../content/types';
 import { ScoreCard } from './ScoreCard';
 import { saveRecording } from '../state/recordings';
+import { apiFetch } from '../utils/api';
 
 type Message = TypeMessage;
 type AudioDataMap = Record<string, string>; // timestamp -> base64
@@ -67,7 +68,7 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
 
   useEffect(() => {
     // Load available voices from server
-    fetch('/api/voices')
+    apiFetch('/api/voices')
       .then((res) => res.json())
       .then((data) => {
         const voiceList = Object.entries(data).map(([, value]: any) => ({
@@ -102,7 +103,7 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     // Try ElevenLabs TTS if enabled
     if (useTTS && selectedVoice) {
       try {
-        const response = await fetch('/api/tts', {
+        const response = await apiFetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

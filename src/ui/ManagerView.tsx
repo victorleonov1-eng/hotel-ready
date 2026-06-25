@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../utils/api';
 import { loadProfiles, deleteProfile, loginOrCreateProfile, updatePin } from '../state/profiles';
 import { getRecording } from '../state/recordings';
 import { getAllScenarios } from '../content/registry';
@@ -136,7 +137,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const handleExportReport = async () => {
     setExporting(true);
     try {
-      const response = await fetch('/api/export-report', {
+      const response = await apiFetch('/api/export-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profiles, scenarios }),
