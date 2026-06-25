@@ -2,9 +2,16 @@
 
 A web app for hotel staff to practise real guest-facing situations by speaking to an AI "guest" and getting instantly scored on their performance.
 
-## Status: Phase 1 Complete
+## Status: Phase 2 Complete
 
-The full architecture and UI for Phase 1 are built and fully functional. Login, practice areas, scenarios, and the role-play → scoring flow are all working end-to-end.
+**Phase 1** (core MVP) is fully functional: login, role-play, scoring, and manager dashboard.
+
+**Phase 2** adds:
+- 3 department scenario packs with 27 total scenarios (Front Desk, F&B, Housekeeping)
+- Emotion-based voice delivery with rate/pitch adjustment based on guest mood
+- Enhanced manager dashboard with staff detail views and delete functionality
+
+The app is production-ready for hotel staff training. Teams can practice real guest-facing conversations with an AI that responds dynamically based on their approach, and managers can track team performance at a glance.
 
 ## Quick Start
 
@@ -42,25 +49,33 @@ The full architecture and UI for Phase 1 are built and fully functional. Login, 
 ## What's Built (Phase 1)
 
 ### ✅ Complete
+**Phase 1: Core functionality**
 - **Login screen** with First/Last name, 4-digit PIN, Position, Department dropdown
 - **Persistent header** showing app name, live date/time, Hotel Name slot, mute toggle
-- **Practice-area selector** (Front Desk pack ready; F&B as drop-in content)
+- **Practice-area selector** with 3 department packs (27 total scenarios)
 - **Scenario list** with best score and best time per scenario
 - **Role-play loop** with conversation, timer, and time tracking (in seconds)
-- **Score card** showing:
-  - Overall 0–100 score
-  - Dimension bars (empathy, clarity, tone/warmth, resolution, outcome) 
-  - Coaching points (2–3 encouraging tips)
-  - Verdict (floor-ready / almost / needs-work)
-  - Time elapsed and best-time highlight
-- **Manager dashboard** (PIN-gated, shows team stats and scenario performance)
+- **Score card** showing overall 0–100 score, 5 dimension bars, coaching points, verdict, and timing
+- **Manager dashboard** (PIN-gated, view team stats and scenario performance)
 - **Type-safe models** (GuestTurn with emotion, AnswerOptions, timing)
-- **Backend APIs:**
-  - `POST /api/guest-turn` → guest reply + emotion (drives voice delivery)
-  - `POST /api/score` → ScoreResult with all dimensions
-  - `POST /api/answer-options` → 5 ranked backup responses for "Stuck? See options"
+- **Backend APIs:** `/api/guest-turn`, `/api/score`, `/api/answer-options`
 - **State management** with PIN-auth profiles, time/score tracking, localStorage persistence
 - **Tailwind + brand colours** (crimson #960404, teal #039594)
+
+**Phase 2: Content and speech**
+- **Scenario content packs:**
+  - **Front Desk / Reception** — 9 scenarios (check-in issues, upselling, billing, late checkout)
+  - **Food & Beverage Service** — 9 scenarios (allergies, wine pairings, complaints, upselling, ambiance)
+  - **Housekeeping / Room Service** — 9 scenarios (room cleaning, maintenance, delays, laundry, noise, comfort)
+- **Emotion-based voice delivery:**
+  - Speech rate and pitch adjusted per guest emotion (angry→slow, satisfied→fast)
+  - Emotion indicators (emoji badges) in conversation bubbles
+  - Integration with Web Speech API for natural guest voice
+- **Enhanced manager dashboard:**
+  - Click staff members to view detailed performance metrics
+  - Per-scenario statistics (attempts, best score, average)
+  - Delete profile functionality with confirmation
+  - Improved layout with scenario and team member panels
 
 ### 🚀 Full User Flow
 1. Login with any name + 4-digit PIN
@@ -136,15 +151,17 @@ Edit `src/ui/Header.tsx`:
 - **Manager PIN:** Defaults to `0000`, changeable only from inside the dashboard
 - **API key security:** Never exposed to browser; all Claude calls go through `/api/*` proxy
 
-## Next Steps (Phase 2+)
+## Next Steps (Phase 3+)
 
-- [ ] Add speech-to-text (browser Web Speech API)
-- [ ] Add text-to-speech (ElevenLabs or fallback to browser `speechSynthesis`)
-- [ ] Implement "Stuck? See options" card UI
-- [ ] Test role-play with real guest scenarios
-- [ ] Add F&B Service pack
-- [ ] Manager dashboard: edit/delete profiles, print reports
-- [ ] Mobile layout polish
+- [ ] Implement "Stuck? See options" UI (use `/api/answer-options` endpoint)
+- [ ] Add more scenario packs (Concierge, Front Office, Accounting, etc.)
+- [ ] Export/print manager reports (PDF generation)
+- [ ] Edit profile functionality (change PIN, position, department)
+- [ ] Bulk staff import (CSV upload for team setup)
+- [ ] Mobile layout refinements
+- [ ] Custom voice selection for ElevenLabs or similar TTS service
+- [ ] Session recording/playback for coaching review
+- [ ] Analytics dashboard (aggregate team performance, trending scenarios)
 
 ## Troubleshooting
 
