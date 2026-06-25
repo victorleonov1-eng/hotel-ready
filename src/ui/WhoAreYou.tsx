@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Department } from '../content/types';
 
 type LoginProps = {
@@ -25,14 +25,34 @@ export function WhoAreYou({ onSubmit, error }: LoginProps) {
   const [position, setPosition] = useState('');
   const [department, setDepartment] = useState<Department>('FO');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (firstName.trim() && lastName.trim() && pin.length === 4 && position.trim()) {
-      onSubmit(firstName.trim(), lastName.trim(), pin, position.trim(), department);
-    }
+  const loadDemo = () => {
+    setFirstName('Demo');
+    setLastName('User');
+    setPin('1234');
+    setPosition('Receptionist');
+    setDepartment('FO');
   };
 
-  const isValid = firstName.trim() && lastName.trim() && pin.length === 4 && position.trim();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('demo')) {
+      loadDemo();
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const fName = firstName.trim();
+    const lName = lastName.trim();
+    const pos = position.trim();
+
+    if (!fName || !lName || pin.length !== 4 || !pos) {
+      return;
+    }
+
+    onSubmit(fName, lName, pin, pos, department);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
@@ -108,12 +128,18 @@ export function WhoAreYou({ onSubmit, error }: LoginProps) {
 
         <button
           type="submit"
-          disabled={!isValid}
-          className="w-full bg-crimson text-white py-2 rounded-lg font-medium disabled:opacity-50 hover:bg-crimson-dark transition"
+          className="w-full bg-crimson text-white py-2 rounded-lg font-medium hover:bg-crimson-dark transition"
         >
           Sign In
         </button>
       </form>
+
+      <button
+        onClick={loadDemo}
+        className="mt-4 text-xs text-gray-500 hover:text-gray-700 underline"
+      >
+        Load Demo Data
+      </button>
     </div>
   );
 }
