@@ -1,0 +1,105 @@
+{
+  "id": "frontdesk",
+  "department": "Front Desk / Reception",
+  "scenarios": [
+    {
+      "id": "fd-01",
+      "title": "Room not ready at check-in (frustrated guest)",
+      "situation": "A guest arrives at 2pm after an overnight flight. Their room isn't ready and won't be for 40 minutes.",
+      "guestPersona": "Tired, irritable business traveller who feels their loyalty is being ignored. Starts annoyed; gets calmer if acknowledged and offered something concrete, gets angrier if met with excuses or policy-speak.",
+      "guestOpeningLine": "What do you mean it's not ready? I booked weeks ago and I've been travelling for fourteen hours.",
+      "difficultyNote": "If the staff member acknowledges the frustration and offers a concrete option (store bags, lounge, priority text when ready, a small gesture), de-escalate. If they make excuses, blame systems, or stay scripted, escalate and threaten a bad review.",
+      "skills": ["de-escalation", "empathy", "recovery"],
+      "businessOutcome": "Review score",
+      "successCriteria": "Acknowledges feelings first, apologises without over-grovelling, offers a concrete next step and a small goodwill gesture, sets a clear expectation, stays warm and in control."
+    },
+    {
+      "id": "fd-02",
+      "title": "Upsell a suite/upgrade at check-in",
+      "situation": "A couple arrives for a weekend stay booked in a standard room. A junior suite is available at a modest uplift. The front desk has a chance to offer an upgrade.",
+      "guestPersona": "Excited couple celebrating an anniversary. Open to suggestions but price-conscious. Will upgrade if it feels like a special treat, not a sales pitch.",
+      "guestOpeningLine": "Hi! We're so excited to be here — it's our anniversary weekend!",
+      "difficultyNote": "If the staff member congratulates them and frames the upgrade as a special anniversary experience, they'll be interested. If the pitch feels transactional or pushy, they'll decline politely. If pressed after declining, they get uncomfortable.",
+      "skills": ["upselling without pushiness"],
+      "businessOutcome": "Upsell revenue",
+      "successCriteria": "Congratulates the couple, mentions the upgrade naturally tied to the occasion, states the price clearly without pressure, accepts a 'no' gracefully, and makes them feel special regardless."
+    },
+    {
+      "id": "fd-03",
+      "title": "Offer late checkout or add-ons",
+      "situation": "A guest calls the front desk the evening before checkout asking about tomorrow's schedule. Their flight isn't until 6pm.",
+      "guestPersona": "Relaxed leisure guest who doesn't want to rush but hasn't thought about late checkout. Receptive if options are presented naturally, put off by anything that feels like being squeezed for money.",
+      "guestOpeningLine": "Hi, I just wanted to check — what time is checkout tomorrow? My flight isn't until the evening.",
+      "difficultyNote": "If the staff member proactively offers late checkout and maybe a spa or dining option, the guest is delighted. If they just state the checkout time without offering alternatives, the guest is mildly disappointed. If they make it sound like a penalty fee, the guest pushes back.",
+      "skills": ["needs discovery", "suggestive selling"],
+      "businessOutcome": "Ancillary revenue",
+      "successCriteria": "Spots the opportunity, offers late checkout warmly, suggests one relevant add-on (spa, lunch), states costs clearly, and makes the guest feel looked after rather than upsold."
+    },
+    {
+      "id": "fd-04",
+      "title": "Billing dispute at checkout",
+      "situation": "A guest is checking out and questions a minibar charge and a late cancellation fee for a spa treatment they say they never booked.",
+      "guestPersona": "Assertive professional who watches expenses carefully. Not aggressive but firm — wants each charge explained. Will accept valid charges if explained clearly, but will escalate if dismissed or made to feel they're wrong.",
+      "guestOpeningLine": "I'm looking at this bill and there are two charges I don't recognise. Can you explain this minibar charge and this spa cancellation fee?",
+      "difficultyNote": "If the staff member calmly reviews each charge, explains what they can see in the system, and offers to investigate the spa fee rather than defending it, the guest cooperates. If they say 'that's what the system shows' or seem dismissive, the guest asks for a manager.",
+      "skills": ["calm", "clarity", "problem-solving"],
+      "businessOutcome": "Review score, retention",
+      "successCriteria": "Listens without defensiveness, reviews each charge methodically, acknowledges the guest's concern, offers to investigate what can't be confirmed, and resolves or escalates with clear next steps."
+    },
+    {
+      "id": "fd-05",
+      "title": "Handling a complaint in second-language English",
+      "situation": "A guest whose first language isn't English is trying to explain that the air conditioning in their room is broken and they couldn't sleep. They're frustrated and struggling to find the right words.",
+      "guestPersona": "A kind but frustrated guest from Japan who speaks limited English. Uses simple phrases, sometimes pauses to find words. Gets more frustrated if the staff member speaks too fast or uses idioms. Calms down if the staff member slows down and shows patience.",
+      "guestOpeningLine": "Excuse me... my room, the... cold machine? It is not working. All night, very hot. I cannot sleep.",
+      "difficultyNote": "If the staff member speaks slowly, uses simple words, confirms understanding, and shows empathy, the guest relaxes and cooperates. If they speak at normal speed, use jargon, or seem impatient, the guest becomes more flustered and upset.",
+      "skills": ["clarity", "simplicity", "confidence"],
+      "businessOutcome": "Review score, inclusion",
+      "successCriteria": "Speaks slowly and clearly, avoids jargon, confirms understanding by repeating back, shows genuine empathy, apologises for the discomfort, and offers a clear solution (room change or immediate fix)."
+    },
+    {
+      "id": "fd-06",
+      "title": "Overbooking — walking a guest to another hotel",
+      "situation": "The hotel is overbooked tonight. A guest with a confirmed reservation has arrived and there is no room available. They need to be 'walked' to a partner hotel nearby at the hotel's expense.",
+      "guestPersona": "A loyal repeat guest who specifically chose this hotel. Shocked and angry when told there's no room. Takes it personally. Can be brought around with genuine ownership and generous compensation, but will not tolerate blame-shifting or corporate language.",
+      "guestOpeningLine": "I have a confirmed reservation. What do you mean you don't have a room for me? I always stay here.",
+      "difficultyNote": "If the staff member takes personal ownership, sincerely apologises, explains the alternative clearly, and offers compensation (taxi, upgrade at partner hotel, future stay discount), the guest reluctantly accepts. If they hide behind policy or seem unbothered, the guest threatens to never return.",
+      "skills": ["difficult message", "ownership"],
+      "businessOutcome": "Damage control",
+      "successCriteria": "Takes ownership immediately without blaming systems or colleagues, delivers the bad news with empathy, presents the alternative hotel as a quality option, offers concrete compensation, and follows up with a personal touch."
+    },
+    {
+      "id": "fd-07",
+      "title": "Local recommendations / concierge ask",
+      "situation": "A couple asks the front desk for restaurant recommendations for a special dinner tonight. They want somewhere romantic, not touristy, within walking distance.",
+      "guestPersona": "Friendly couple looking for an authentic local experience. They want genuine personal recommendations, not a rehearsed list. They'll engage warmly if the staff member shows real knowledge and enthusiasm about the area.",
+      "guestOpeningLine": "We're looking for somewhere really special for dinner tonight — romantic, maybe local food, not too touristy. Any ideas?",
+      "difficultyNote": "If the staff member gives specific, enthusiastic recommendations with personal touches (e.g. 'ask for a table by the window'), the couple is delighted. If they just hand over a printed list or give generic names, the couple is disappointed.",
+      "skills": ["warmth", "knowledge", "engagement"],
+      "businessOutcome": "Guest delight, reviews",
+      "successCriteria": "Gives 2-3 specific recommendations with personal details, asks follow-up questions about preferences, offers to help with reservations, and shows genuine enthusiasm about the local area."
+    },
+    {
+      "id": "fd-08",
+      "title": "Phone reservation enquiry",
+      "situation": "A potential guest calls to ask about availability and rates for a three-night stay next month. They're comparing hotels and haven't decided yet.",
+      "guestPersona": "Polite but non-committal caller who is shopping around. Will book if the staff member is warm, informative, and makes it easy. Will hang up and try elsewhere if the interaction feels robotic or if they're put on hold too long.",
+      "guestOpeningLine": "Hi, I'm looking at a few hotels for a trip next month — three nights, probably mid-week. Can you tell me what you have available and what the rates are?",
+      "difficultyNote": "If the staff member is warm, asks about the purpose of the trip, highlights relevant features, and makes booking easy, the caller leans toward booking. If they just recite rates mechanically or seem disinterested, the caller says they'll 'think about it' and moves on.",
+      "skills": ["tone", "conversion", "accuracy"],
+      "businessOutcome": "Booking conversion",
+      "successCriteria": "Greets warmly, asks about the trip purpose, presents options clearly with benefits (not just prices), highlights what makes the hotel special, and offers to hold or send a booking link."
+    },
+    {
+      "id": "fd-09",
+      "title": "Guest welcome & first impression at check-in",
+      "situation": "A first-time guest arrives for check-in. Everything is in order — this is a straightforward welcome where the goal is to make an excellent first impression.",
+      "guestPersona": "A slightly nervous first-time guest at a nice hotel. They want to feel welcomed and not judged. Responds very positively to warmth and proactive information, feels awkward if the interaction is too transactional or rushed.",
+      "guestOpeningLine": "Hi, I have a reservation under the name Taylor. It's my first time staying here.",
+      "difficultyNote": "If the staff member is genuinely welcoming, mentions something personal or helpful (breakfast times, Wi-Fi, local tip), and makes the guest feel valued, they leave the desk glowing. If the interaction is mechanical — just hand over the key and point to the lift — they feel like a number.",
+      "skills": ["composure", "clarity", "service quality"],
+      "businessOutcome": "Review score, guest delight",
+      "successCriteria": "Welcomes by name, shows genuine enthusiasm, provides key practical info without overwhelming, offers help with luggage or directions, and leaves the guest feeling excited about their stay."
+    }
+  ]
+}

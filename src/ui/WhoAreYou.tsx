@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import type { Department } from '../content/types';
+
+type LoginProps = {
+  onSubmit: (firstName: string, lastName: string, pin: string, position: string, department: Department) => void;
+  error?: string;
+};
+
+const DEPARTMENTS: { value: Department; label: string }[] = [
+  { value: 'FO', label: 'Front Office' },
+  { value: 'F&B', label: 'Food & Beverage' },
+  { value: 'HK', label: 'Housekeeping' },
+  { value: 'FIN', label: 'Finance' },
+  { value: 'KITCHEN', label: 'Kitchen' },
+  { value: 'TECH', label: 'Technical / Maintenance' },
+  { value: 'MANAGER', label: 'Manager' },
+  { value: 'GM', label: 'General Manager' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+export function WhoAreYou({ onSubmit, error }: LoginProps) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [pin, setPin] = useState('');
+  const [position, setPosition] = useState('');
+  const [department, setDepartment] = useState<Department>('FO');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (firstName.trim() && lastName.trim() && pin.length === 4 && position.trim()) {
+      onSubmit(firstName.trim(), lastName.trim(), pin, position.trim(), department);
+    }
+  };
+
+  const isValid = firstName.trim() && lastName.trim() && pin.length === 4 && position.trim();
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+      <h2 className="text-2xl font-bold text-crimson-dark mb-2">Welcome to HOTEL Ready</h2>
+      <p className="text-gray-600 mb-6 text-center max-w-sm">
+        Sign in to practise real guest conversations and get instant coaching.
+      </p>
+
+      {error && <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4 text-sm">{error}</div>}
+
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+          <input
+            autoFocus
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="e.g. Jane"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="e.g. Smith"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">4-Digit PIN</label>
+          <input
+            type="password"
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            placeholder="••••"
+            maxLength={4}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson font-mono text-center text-lg"
+          />
+          <p className="text-xs text-gray-500 mt-1">Choose your own password — enter it to sign in again</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+          <input
+            type="text"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            placeholder="e.g. Receptionist"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+          <select
+            value={department}
+            onChange={(e) => setDepartment(e.target.value as Department)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson"
+          >
+            {DEPARTMENTS.map((dept) => (
+              <option key={dept.value} value={dept.value}>
+                {dept.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={!isValid}
+          className="w-full bg-crimson text-white py-2 rounded-lg font-medium disabled:opacity-50 hover:bg-crimson-dark transition"
+        >
+          Sign In
+        </button>
+      </form>
+    </div>
+  );
+}

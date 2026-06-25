@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-crimson: #960404;
+  --color-crimson-dark: #320101;
+  --color-crimson-light: #F6E9E9;
+  --color-teal: #039594;
+  --color-teal-light: #E4F4F4;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
