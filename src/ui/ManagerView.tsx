@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loadProfiles, deleteProfile, loginOrCreateProfile } from '../state/profiles';
+import { loadProfiles, deleteProfile, loginOrCreateProfile, updatePin } from '../state/profiles';
 import { getRecording } from '../state/recordings';
 import { getAllScenarios } from '../content/registry';
 import { ImportStaffDialog } from './ImportStaffDialog';
@@ -31,8 +31,13 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingStaff, setEditingStaff] = useState<string | null>(null);
   const [editPin, setEditPin] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
   const [exporting, setExporting] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
+  const [resettingPin, setResettingPin] = useState<{ firstName: string; lastName: string } | null>(null);
+  const [newPinInput, setNewPinInput] = useState('');
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,11 +78,58 @@ export function ManagerView({ onBack }: ManagerViewProps) {
 
   const handleSavePin = (firstName: string, lastName: string) => {
     if (editPin.length !== 4) return;
-    const staff = profiles.find((p) => p.firstName === firstName && p.lastName === lastName);
-    if (staff) {
-      loginOrCreateProfile(firstName, lastName, editPin, staff.position, staff.department);
+    if (updatePin(firstName, lastName, editPin)) {
       setProfiles(loadProfiles());
       setEditingStaff(null);
+      alert(`PIN updated to ${editPin}`);
+    } else {
+      alert('Failed to update PIN');
+    }
+  };
+
+  const handleResetPin = (firstName: string, lastName: string) => {
+    setResettingPin({ firstName, lastName });
+    setNewPinInput('');
+  };
+
+  const handleConfirmPinReset = () => {
+    if (!resettingPin || newPinInput.length !== 4) {
+      alert('PIN must be 4 digits');
+      return;
+    }
+
+    if (updatePin(resettingPin.firstName, resettingPin.lastName, newPinInput)) {
+      setProfiles(loadProfiles());
+      alert(`PIN updated to ${newPinInput} for ${resettingPin.firstName} ${resettingPin.lastName}`);
+      setResettingPin(null);
+      setNewPinInput('');
+    } else {
+      alert('Failed to update PIN');
+    }
+  };
+
+  const handleEditName = (firstName: string, lastName: string) => {
+    setEditingName(true);
+    setEditFirstName(firstName);
+    setEditLastName(lastName);
+  };
+
+  const handleSaveName = (oldFirstName: string, oldLastName: string) => {
+    if (!editFirstName.trim() || !editLastName.trim()) {
+      alert('Name cannot be empty');
+      return;
+    }
+
+    const staff = profiles.find((p) => p.firstName === oldFirstName && p.lastName === oldLastName);
+    if (staff) {
+      // Delete old profile
+      deleteProfile(oldFirstName, oldLastName);
+      // Create new profile with updated name
+      loginOrCreateProfile(editFirstName.trim(), editLastName.trim(), staff.pin, staff.position, staff.department);
+      setProfiles(loadProfiles());
+      setEditingName(false);
+      setEditFirstName('');
+      setEditLastName('');
     }
   };
 
@@ -108,6 +160,47 @@ export function ManagerView({ onBack }: ManagerViewProps) {
       setExporting(false);
     }
   };
+
+  // PIN Reset Modal
+  if (resettingPin) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm mx-4">
+          <h3 className="text-xl font-bold text-crimson-dark mb-4">
+            Reset PIN for {resettingPin.firstName} {resettingPin.lastName}
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">Enter a new 4-digit PIN:</p>
+          <input
+            autoFocus
+            type="password"
+            value={newPinInput}
+            onChange={(e) => setNewPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            placeholder="0000"
+            maxLength={4}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-crimson font-mono text-center text-lg"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmPinReset}
+              disabled={newPinInput.length !== 4}
+              className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => {
+                setResettingPin(null);
+                setNewPinInput('');
+              }}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!authenticated) {
     return (
@@ -168,6 +261,12 @@ export function ManagerView({ onBack }: ManagerViewProps) {
           >
             &larr; Back to Dashboard
           </button>
+          <button
+            onClick={() => window.print()}
+            className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            🖨️ Print
+          </button>
         </div>
         <h2 className="text-2xl font-bold text-crimson-dark mb-6">Analytics & Insights</h2>
         <AnalyticsDashboard />
@@ -196,13 +295,63 @@ export function ManagerView({ onBack }: ManagerViewProps) {
         >
           &larr; Back to Dashboard
         </button>
-        <h2 className="text-2xl font-bold text-crimson-dark mb-1">
-          {staff.firstName} {staff.lastName}
-        </h2>
-        <div className="text-sm text-gray-600 mb-6">
-          <div>{staff.position} · {staff.department}</div>
-          <div>{staff.attempts.length} total attempt{staff.attempts.length !== 1 ? 's' : ''}</div>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-crimson-dark mb-1">
+              {staff.firstName} {staff.lastName}
+            </h2>
+            <div className="text-sm text-gray-600">
+              <div>{staff.position} · {staff.department}</div>
+              <div>{staff.attempts.length} total attempt{staff.attempts.length !== 1 ? 's' : ''}</div>
+            </div>
+          </div>
+          <button
+            onClick={() => handleEditName(staff.firstName, staff.lastName)}
+            className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 whitespace-nowrap"
+          >
+            ✏️ Edit Name
+          </button>
         </div>
+
+        {editingName && (
+          <div className="bg-blue-50 p-4 rounded mb-6 border border-blue-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Edit Participant Name</h4>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <input
+                type="text"
+                value={editFirstName}
+                onChange={(e) => setEditFirstName(e.target.value)}
+                placeholder="First Name"
+                className="border border-gray-300 rounded px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                value={editLastName}
+                onChange={(e) => setEditLastName(e.target.value)}
+                placeholder="Last Name"
+                className="border border-gray-300 rounded px-3 py-2 text-sm"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSaveName(staff.firstName, staff.lastName)}
+                className="flex-1 px-3 py-2 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700"
+              >
+                Save Name
+              </button>
+              <button
+                onClick={() => {
+                  setEditingName(false);
+                  setEditFirstName('');
+                  setEditLastName('');
+                }}
+                className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           <h3 className="font-semibold text-crimson-dark">Scenario Performance</h3>
@@ -250,39 +399,47 @@ export function ManagerView({ onBack }: ManagerViewProps) {
 
         <div className="mt-6 pt-6 border-t space-y-2">
           <div className="bg-gray-50 p-4 rounded">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Change PIN</h4>
-            {editingStaff === `${staff.firstName}|${staff.lastName}` ? (
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  value={editPin}
-                  onChange={(e) => setEditPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  maxLength={4}
-                  placeholder="New PIN"
-                  className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono text-center"
-                />
-                <button
-                  onClick={() => handleSavePin(staff.firstName, staff.lastName)}
-                  disabled={editPin.length !== 4}
-                  className="px-4 py-2 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setEditingStaff(null)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">PIN Management</h4>
+            <div className="space-y-2">
               <button
-                onClick={() => handleEditPin(staff.firstName, staff.lastName)}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                onClick={() => handleResetPin(staff.firstName, staff.lastName)}
+                className="w-full px-3 py-2 bg-orange-600 text-white rounded text-sm font-medium hover:bg-orange-700"
               >
-                Click to change PIN
+                🔄 Reset PIN to 0000
               </button>
-            )}
+              {editingStaff === `${staff.firstName}|${staff.lastName}` ? (
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={editPin}
+                    onChange={(e) => setEditPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    maxLength={4}
+                    placeholder="New PIN"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono text-center"
+                  />
+                  <button
+                    onClick={() => handleSavePin(staff.firstName, staff.lastName)}
+                    disabled={editPin.length !== 4}
+                    className="px-4 py-2 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingStaff(null)}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleEditPin(staff.firstName, staff.lastName)}
+                  className="w-full text-sm text-blue-600 hover:text-blue-700 py-2"
+                >
+                  Set Custom PIN
+                </button>
+              )}
+            </div>
           </div>
 
           <button
@@ -377,15 +534,31 @@ export function ManagerView({ onBack }: ManagerViewProps) {
               profiles.map((p) => (
                 <div
                   key={`${p.firstName}-${p.lastName}`}
-                  className="bg-white border rounded p-3 text-sm cursor-pointer hover:border-crimson"
-                  onClick={() => handleViewStaffDetail(p.firstName, p.lastName)}
+                  className="bg-white border rounded p-3 text-sm hover:border-crimson"
                 >
-                  <div className="font-semibold text-crimson-dark">
+                  <div
+                    className="font-semibold text-crimson-dark cursor-pointer hover:underline"
+                    onClick={() => handleViewStaffDetail(p.firstName, p.lastName)}
+                  >
                     {p.firstName} {p.lastName}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">
                     <div>{p.position}</div>
                     <div>{p.attempts.length} attempt{p.attempts.length !== 1 ? 's' : ''}</div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleResetPin(p.firstName, p.lastName)}
+                      className="flex-1 text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
+                    >
+                      🔄 Reset PIN
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProfile(p.firstName, p.lastName)}
+                      className="flex-1 text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    >
+                      🗑️ Delete
+                    </button>
                   </div>
                 </div>
               ))

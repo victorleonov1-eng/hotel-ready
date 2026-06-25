@@ -12,3 +12,71 @@ body {
   font-family: Inter, system-ui, -apple-system, sans-serif;
   margin: 0;
 }
+
+@media print {
+  /* Hide non-print elements */
+  button,
+  a,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Print layout */
+  body {
+    background: white;
+  }
+
+  .px-4 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .py-4 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Ensure good spacing for printed content */
+  h2 {
+    margin-top: 20px !important;
+    margin-bottom: 15px !important;
+    page-break-after: avoid !important;
+  }
+
+  h3 {
+    page-break-after: avoid !important;
+  }
+
+  /* Keep table headers on same page as content */
+  table {
+    page-break-inside: avoid !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+
+  /* Keep cards together */
+  .border {
+    page-break-inside: avoid !important;
+  }
+
+  /* Print friendly colors */
+  .text-crimson,
+  .text-crimson-dark {
+    color: #000 !important;
+  }
+
+  /* Add timestamp to print */
+  body::after {
+    content: "Printed on " attr(data-print-date);
+  }
+}

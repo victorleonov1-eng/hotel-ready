@@ -13,15 +13,41 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
     doc.on('error', reject);
     doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-    // Header
-    doc.fontSize(24).font('Helvetica-Bold').fillColor(CRIMSON).text('HOTEL Ready', { align: 'center' });
-    doc.fontSize(14).font('Helvetica').fillColor('#666').text('Team Performance Report', { align: 'center' });
-    doc.fontSize(10).fillColor('#999').text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
-    doc.moveDown();
+    // Header with left and right layout
+    const headerY = doc.y;
+    const pageWidth = doc.page.width;
+
+    // Left side - HOTEL Ready (40pt from left)
+    doc.fontSize(22).font('Helvetica-Bold').fillColor(CRIMSON).text('HOTEL Ready', 40, headerY, {
+      width: pageWidth / 2 - 60,
+    });
+
+    // Right side - Hotel Name (positioned on right)
+    doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('Hotel Name', pageWidth / 2, headerY, {
+      width: pageWidth / 2 - 60,
+      align: 'right',
+    });
+
+    // Move down after header
+    doc.y = headerY + 35;
+    doc.moveDown(0.5);
+
+    // Subtitle and date
+    doc.fontSize(12).font('Helvetica').fillColor('#333').text('Team Performance Report', {
+      align: 'center',
+    });
+    doc.fontSize(10).fillColor('#999').text(`Generated: ${new Date().toLocaleDateString()}`, {
+      align: 'center',
+    });
+    doc.moveDown(0.5);
+
+    // Horizontal line
+    doc.moveTo(40, doc.y).lineTo(pageWidth - 40, doc.y).stroke('#ccc');
+    doc.moveDown(1);
 
     // Team Summary
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('📊 Team Summary');
-    doc.fontSize(10).font('Helvetica').fillColor('#333');
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(CRIMSON).text('Team Summary');
+    doc.fontSize(11).font('Helvetica').fillColor('#333');
 
     const totalAttempts = profiles.reduce((sum: number, p) => sum + p.attempts.length, 0);
     const avgScore = totalAttempts > 0
@@ -37,30 +63,50 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
       { label: 'Departments', value: [...new Set(profiles.map((p) => p.department))].length },
     ];
 
-    doc.fillColor('#666');
-    const boxWidth = (doc.page.width - 80) / 2;
-    let x = 40;
-    let y = doc.y;
+    // Summary boxes - 2x2 grid layout
+    const boxWidth = (doc.page.width - 120) / 2; // 40 left margin + 40 gap + 40 right margin
+    const boxHeight = 65;
+    const gapX = 40; // gap between left and right boxes
+    const gapY = 15; // gap between top and bottom rows
+    const startX = 40;
+    const startY = doc.y;
 
     summaryData.forEach((item, idx) => {
-      if (idx === 2) {
-        x = 40;
-        y += 60;
-      } else if (idx === 1) {
-        x = 40 + boxWidth + 20;
-      }
+      // Calculate row and column
+      const row = Math.floor(idx / 2); // 0 or 1
+      const col = idx % 2; // 0 or 1
 
-      doc.rect(x, y, boxWidth, 50).stroke('#ddd');
-      doc.fontSize(11).font('Helvetica-Bold').text(item.label, x + 10, y + 10, { width: boxWidth - 20 });
-      doc.fontSize(16).font('Helvetica-Bold').fillColor(TEAL).text(String(item.value), x + 10, y + 25, { width: boxWidth - 20 });
-      doc.fillColor('#666');
+      // Calculate position
+      const x = startX + col * (boxWidth + gapX);
+      const y = startY + row * (boxHeight + gapY);
+
+      // Draw box border
+      doc.rect(x, y, boxWidth, boxHeight).stroke('#ccc');
+
+      // Draw label
+      doc.fontSize(11).font('Helvetica').fillColor('#666').text(
+        item.label,
+        x + 10,
+        y + 8,
+        { width: boxWidth - 20, height: 15 }
+      );
+
+      // Draw value
+      doc.fontSize(18).font('Helvetica-Bold').fillColor(TEAL).text(
+        String(item.value),
+        x + 10,
+        y + 28,
+        { width: boxWidth - 20, height: 25 }
+      );
     });
 
-    doc.moveDown(6);
+    // Move cursor below the 2x2 grid
+    doc.y = startY + 2 * (boxHeight + gapY) + 20;
+    doc.moveDown();
 
     // Top Performers
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('🏆 Top Performers');
-    doc.fontSize(10).font('Helvetica').fillColor('#333');
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(CRIMSON).text('Top Performers');
+    doc.fontSize(11).font('Helvetica').fillColor('#333');
 
     const topPerformers = profiles
       .filter((p) => p.attempts.length > 0)
@@ -74,13 +120,13 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
       .slice(0, 5);
 
     if (topPerformers.length === 0) {
-      doc.fontSize(10).fillColor('#999').text('No attempts yet');
+      doc.fontSize(11).fillColor('#666').text('No attempts yet');
     } else {
-      doc.fontSize(9).fillColor('#666');
+      doc.fontSize(10).fillColor('#333');
       topPerformers.forEach((staff: typeof topPerformers[0], idx) => {
         const rank = idx + 1;
         doc.text(
-          `${rank}. ${staff.name} — Avg: ${staff.avg}, Best: ${staff.best}, Attempts: ${staff.attempts}`
+          `${rank}. ${staff.name} - Avg: ${staff.avg}, Best: ${staff.best}, Attempts: ${staff.attempts}`
         );
       });
     }
@@ -88,8 +134,8 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
     doc.moveDown();
 
     // Needs Improvement
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('⚠️ Needs Improvement');
-    doc.fontSize(10).font('Helvetica').fillColor('#333');
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(CRIMSON).text('Needs Improvement');
+    doc.fontSize(11).font('Helvetica').fillColor('#333');
 
     const needsImprovement = profiles
       .filter((p) => p.attempts.length > 0)
@@ -102,11 +148,11 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
       .sort((a, b) => a.avg - b.avg);
 
     if (needsImprovement.length === 0) {
-      doc.fontSize(10).fillColor('#999').text('All staff performing well (avg ≥ 65)');
+      doc.fontSize(11).fillColor('#333').text('All staff performing well (avg >= 65)');
     } else {
-      doc.fontSize(9).fillColor('#666');
+      doc.fontSize(10).fillColor('#333');
       needsImprovement.forEach((staff: typeof needsImprovement[0]) => {
-        doc.text(`• ${staff.name} — Avg: ${staff.avg} (${staff.attempts} attempts)`);
+        doc.text(`- ${staff.name} - Avg: ${staff.avg} (${staff.attempts} attempts)`);
       });
     }
 
@@ -117,8 +163,8 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
       doc.addPage();
     }
 
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('📋 Scenario Difficulty Analysis');
-    doc.fontSize(10).font('Helvetica').fillColor('#333');
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(CRIMSON).text('Scenario Difficulty Analysis');
+    doc.fontSize(11).font('Helvetica').fillColor('#333');
 
     const scenarioStats = scenarios
       .map((s) => {
@@ -134,21 +180,17 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
       .sort((a, b) => (a.avg ?? 0) - (b.avg ?? 0));
 
     if (scenarioStats.length === 0) {
-      doc.fontSize(10).fillColor('#999').text('No scenario attempts yet');
+      doc.fontSize(11).fillColor('#333').text('No scenario attempts yet');
     } else {
-      doc.fontSize(8).fillColor('#666');
+      doc.fontSize(10).fillColor('#333');
       scenarioStats.slice(0, 10).forEach((scenario: typeof scenarioStats[0]) => {
-        const barWidth = 200;
-        const fillWidth = (scenario.avg ?? 0) * 2;
-        doc.text(`${scenario.title}`);
-        doc.rect(40, doc.y, barWidth, 12).stroke('#ddd');
-        if (fillWidth > 0) {
-          doc.rect(40, doc.y, fillWidth, 12).fill(TEAL);
-        }
-        doc.fillColor('#666').text(`${scenario.avg ?? 'N/A'} avg (${scenario.attempts} attempts)`, barWidth + 60, doc.y - 12);
-        doc.moveDown(2);
+        doc.text(`${scenario.title}`, 40);
+        doc.fontSize(9).fillColor('#666').text(`Avg: ${scenario.avg ?? 'N/A'} (${scenario.attempts} attempts)`, 40);
+        doc.moveDown(0.5);
       });
     }
+
+    doc.moveDown();
 
     // Staff Details (on new page if needed)
     if (profiles.length > 0) {
@@ -156,9 +198,9 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
         doc.addPage();
       }
 
-      doc.fontSize(14).font('Helvetica-Bold').fillColor(CRIMSON).text('👥 Staff Performance Details');
-      doc.fontSize(10).font('Helvetica').fillColor('#333');
-      doc.moveDown(0.5);
+      doc.fontSize(16).font('Helvetica-Bold').fillColor(CRIMSON).text('Staff Performance Details');
+      doc.fontSize(11).font('Helvetica').fillColor('#333');
+      doc.moveDown();
 
       profiles.forEach((staff: UserProfile, idx) => {
         if (doc.y > doc.page.height - 80) {
@@ -170,15 +212,15 @@ export async function generateReportPDF(profiles: UserProfile[], scenarios: Scen
             ? Math.round(staff.attempts.reduce((sum: number, a) => sum + a.score, 0) / staff.attempts.length)
             : 0;
 
-        doc.fontSize(11).font('Helvetica-Bold').fillColor(CRIMSON).text(
+        doc.fontSize(12).font('Helvetica-Bold').fillColor(CRIMSON).text(
           `${idx + 1}. ${staff.firstName} ${staff.lastName}`
         );
-        doc.fontSize(9).font('Helvetica').fillColor('#666');
+        doc.fontSize(10).font('Helvetica').fillColor('#333');
         doc.text(`Position: ${staff.position} | Department: ${staff.department}`);
         doc.text(
           `Attempts: ${staff.attempts.length} | Average: ${avgScore} | Best: ${staff.attempts.length > 0 ? Math.max(...staff.attempts.map((a) => a.score)) : 'N/A'}`
         );
-        doc.moveDown(0.3);
+        doc.moveDown();
       });
     }
 

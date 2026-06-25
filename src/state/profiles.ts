@@ -96,3 +96,16 @@ export function deleteProfile(firstName: string, lastName: string) {
   const filtered = profiles.filter((p) => !(p.firstName.toLowerCase() === fNorm && p.lastName.toLowerCase() === lNorm));
   saveProfiles(filtered);
 }
+
+export function updatePin(firstName: string, lastName: string, newPin: string): boolean {
+  const profiles = loadProfiles();
+  const fNorm = firstName.trim().toLowerCase();
+  const lNorm = lastName.trim().toLowerCase();
+  const profile = profiles.find((p) => p.firstName.toLowerCase() === fNorm && p.lastName.toLowerCase() === lNorm);
+
+  if (!profile) return false;
+
+  profile.pin = newPin;
+  saveProfiles(profiles);
+  return true;
+}
