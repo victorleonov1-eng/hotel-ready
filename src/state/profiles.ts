@@ -62,7 +62,8 @@ export function recordAttempt(
   scenarioId: string,
   score: number,
   seconds: number,
-  usedCards: boolean
+  usedCards: boolean,
+  recordingId?: string
 ) {
   const profiles = loadProfiles();
   const fNorm = firstName.trim().toLowerCase();
@@ -76,6 +77,7 @@ export function recordAttempt(
     seconds,
     usedCards,
     at: new Date().toISOString(),
+    recordingId,
   });
 
   const prevScore = profile.bestByScenario[scenarioId] ?? 0;

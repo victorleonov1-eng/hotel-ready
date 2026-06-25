@@ -2,7 +2,7 @@
 
 A web app for hotel staff to practise real guest-facing situations by speaking to an AI "guest" and getting instantly scored on their performance.
 
-## Status: Phase 4.1 Complete (PDF Reports)
+## Status: Phase 4.2 Complete (Session Playback)
 
 **Phase 1** (core MVP): Login, role-play, scoring, and manager dashboard fully functional.
 
@@ -75,7 +75,7 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
   - Graceful fallback to browser speechSynthesis if API key not configured
   - User voice preference saved to localStorage
 
-**Phase 4.1: Manager Report Export**
+**Phase 4.1: Manager Report Export** ✅
 - **PDF report generation:**
   - Download team performance reports as PDF
   - Includes team summary (staff count, total attempts, average score)
@@ -85,6 +85,23 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
   - Individual staff performance details
   - Professional formatting with HOTEL Ready branding (crimson/teal)
   - Single-click export from manager dashboard
+
+**Phase 4.2: Session Recording & Playback** ✅
+- **Automatic session recording:**
+  - Captures full conversation transcript with timestamps
+  - Records ElevenLabs premium voice audio (base64 encoded)
+  - Stores metadata: score, duration, scenario, timestamp
+  - Automatic cleanup to prevent localStorage overflow (max 50 recordings)
+- **Session playback for coaching review:**
+  - Play/pause controls with progress bar
+  - Interactive transcript with play buttons per message
+  - Auto-advance through guest messages during playback
+  - Shows original score and emotion states
+  - Accessible from staff detail view ("🎬 View Recording" button)
+- **Storage management:**
+  - localStorage-based with size limits (~5MB per recording)
+  - Automatic fallback if recording too large (stores transcript only)
+  - Automatic pruning of oldest recordings to prevent overflow
 
 **Phase 2: Content and speech**
 - **3 Scenario content packs (27 scenarios):**
@@ -158,15 +175,19 @@ hotel-ready/
         frontdesk.json  # 9 front-desk scenarios
     state/
       profiles.ts       # localStorage profile management
+      recordings.ts     # Recording storage with size management
     ui/
-      Header.tsx        # Persistent header with branding
-      Footer.tsx        # Footer with runtime year
-      WhoAreYou.tsx     # Login form (has form wiring bug)
-      PracticeAreaSelector.tsx  # Pack chooser
-      ScenarioList.tsx  # Available scenarios
-      RolePlay.tsx      # Main conversation loop + timer
-      ScoreCard.tsx     # Results with dimension bars + coaching
-      ManagerView.tsx   # PIN-gated team dashboard
+      Header.tsx              # Persistent header with branding
+      Footer.tsx              # Footer with runtime year
+      WhoAreYou.tsx           # Login form
+      PracticeAreaSelector.tsx # Pack chooser
+      ScenarioList.tsx        # Available scenarios
+      RolePlay.tsx            # Main conversation loop + timer + recording
+      ScoreCard.tsx           # Results with dimension bars + coaching
+      SessionPlayback.tsx     # Session review with transcript + audio playback
+      ManagerView.tsx         # PIN-gated team dashboard + recording access
+      ImportStaffDialog.tsx   # CSV staff bulk import
+      AnalyticsDashboard.tsx  # Team performance analytics
   .env.example          # API key template
   vite.config.ts        # Vite + Tailwind config
 ```
@@ -199,13 +220,13 @@ Edit `src/ui/Header.tsx`:
 - **Manager PIN:** Defaults to `0000`, changeable only from inside the dashboard
 - **API key security:** Never exposed to browser; all Claude calls go through `/api/*` proxy
 
-## Next Steps (Phase 4.2+)
+## Next Steps (Phase 4.3+)
 
-**Phase 4.1 ✅ Complete**
-- [x] PDF manager report export with team summary, top performers, needs improvement, scenario analysis
+**Phase 4 ✅ Complete**
+- [x] Phase 4.1: PDF manager report export with team summary, top performers, needs improvement, scenario analysis
+- [x] Phase 4.2: Session recording/playback with audio + transcript for coaching review
 
 **Upcoming Phases**
-- [ ] Phase 4.2: Session recording/playback for coaching review
 - [ ] Phase 4.3: Additional scenario packs (Accounting, Technical Support, Spa/Wellness)
 - [ ] Phase 5: Certifications & badges for skill mastery
 - [ ] Phase 6: Backend database migration (from localStorage)

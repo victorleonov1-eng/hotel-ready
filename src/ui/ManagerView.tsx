@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { loadProfiles, deleteProfile, loginOrCreateProfile } from '../state/profiles';
+import { getRecording } from '../state/recordings';
 import { getAllScenarios } from '../content/registry';
 import { ImportStaffDialog } from './ImportStaffDialog';
 import { AnalyticsDashboard } from './AnalyticsDashboard';
+import { SessionPlayback } from './SessionPlayback';
+import type { Recording } from '../content/types';
 
 const DEFAULT_MANAGER_PIN = '0000';
 
@@ -10,7 +13,7 @@ type ManagerViewProps = {
   onBack: () => void;
 };
 
-type ViewMode = 'dashboard' | 'staff-detail' | 'analytics';
+type ViewMode = 'dashboard' | 'staff-detail' | 'analytics' | 'playback';
 
 export function ManagerView({ onBack }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
@@ -29,6 +32,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const [editingStaff, setEditingStaff] = useState<string | null>(null);
   const [editPin, setEditPin] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +53,14 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const handleViewStaffDetail = (firstName: string, lastName: string) => {
     setSelectedStaff(`${firstName}|${lastName}`);
     setViewMode('staff-detail');
+  };
+
+  const handleViewRecording = (attemptId: string) => {
+    const recording = getRecording(attemptId);
+    if (recording) {
+      setSelectedRecording(recording);
+      setViewMode('playback');
+    }
   };
 
   const handleEditPin = (firstName: string, lastName: string) => {
@@ -132,6 +144,20 @@ export function ManagerView({ onBack }: ManagerViewProps) {
 
   const scenarios = getAllScenarios();
 
+  if (viewMode === 'playback' && selectedRecording) {
+    const scenario = scenarios.find((s) => s.id === selectedRecording.scenarioId);
+    if (!scenario) return null;
+
+    return (
+      <SessionPlayback
+        recording={selectedRecording}
+        scenario={scenario}
+        score={selectedRecording.score}
+        onBack={() => setViewMode('staff-detail')}
+      />
+    );
+  }
+
   if (viewMode === 'analytics') {
     return (
       <div className="px-4 py-4 max-w-6xl mx-auto">
@@ -183,27 +209,42 @@ export function ManagerView({ onBack }: ManagerViewProps) {
           {staffScenarios.filter((s) => s.attempts > 0).length === 0 ? (
             <p className="text-sm text-gray-500">No attempts yet</p>
           ) : (
-            staffScenarios.map(({ scenario, avg, best, attempts, lastAttempt }) => (
-              <div key={scenario.id} className="bg-white border rounded p-4">
-                <h4 className="font-semibold text-crimson-dark text-sm">{scenario.title}</h4>
-                {attempts > 0 && (
-                  <div className="text-xs text-gray-600 mt-2 grid grid-cols-3 gap-4">
+            staffScenarios.map(({ scenario, avg, best, attempts, lastAttempt }) => {
+              const recordingExists = lastAttempt && lastAttempt.recordingId ? getRecording(lastAttempt.recordingId) : null;
+              return (
+                <div key={scenario.id} className="bg-white border rounded p-4">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <div className="text-gray-500">Attempts</div>
-                      <div className="font-semibold text-lg">{attempts}</div>
+                      <h4 className="font-semibold text-crimson-dark text-sm">{scenario.title}</h4>
+                      {attempts > 0 && (
+                        <div className="text-xs text-gray-600 mt-2 grid grid-cols-3 gap-4">
+                          <div>
+                            <div className="text-gray-500">Attempts</div>
+                            <div className="font-semibold text-lg">{attempts}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Best Score</div>
+                            <div className="font-semibold text-lg">{best}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Average</div>
+                            <div className="font-semibold text-lg">{avg}</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <div className="text-gray-500">Best Score</div>
-                      <div className="font-semibold text-lg">{best}</div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">Average</div>
-                      <div className="font-semibold text-lg">{avg}</div>
-                    </div>
+                    {recordingExists && lastAttempt && lastAttempt.recordingId && (
+                      <button
+                        onClick={() => handleViewRecording(lastAttempt.recordingId!)}
+                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 ml-2 whitespace-nowrap"
+                      >
+                        🎬 View Recording
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            ))
+                </div>
+              );
+            })
           )}
         </div>
 

@@ -42,12 +42,31 @@ export type ScoreResult = {
   oneThingToFix: string;
 };
 
+export type Message = {
+  role: 'staff' | 'guest';
+  text: string;
+  emotion?: string;
+  timestamp: number;
+};
+
+export type Recording = {
+  attemptId: string;
+  scenarioId: string;
+  messages: Message[];
+  score: number;
+  seconds: number;
+  usedCards: boolean;
+  recordedAt: string;
+  audioData?: Record<string, string>; // Map of timestamp -> base64 audio
+};
+
 export type Attempt = {
   scenarioId: string;
   score: number;
   seconds: number;
   usedCards: boolean;
   at: string;
+  recordingId?: string;
 };
 
 export type Department = "FO" | "F&B" | "HK" | "FIN" | "KITCHEN" | "TECH" | "MANAGER" | "GM" | "OTHER";

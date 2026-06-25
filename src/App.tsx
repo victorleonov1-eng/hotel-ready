@@ -50,10 +50,10 @@ function App() {
     }
   }
 
-  function handleScenarioDone(score: number, seconds: number, usedCards: boolean) {
+  function handleScenarioDone(score: number, seconds: number, usedCards: boolean, recordingId: string) {
     if (!profile) return;
     const currentScreen = screen as any;
-    recordAttempt(profile.firstName, profile.lastName, currentScreen.scenarioId, score, seconds, usedCards);
+    recordAttempt(profile.firstName, profile.lastName, currentScreen.scenarioId, score, seconds, usedCards, recordingId);
     refreshProfile();
   }
 

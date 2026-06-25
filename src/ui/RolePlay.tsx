@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import type { Scenario, ScoreResult } from '../content/types';
+import type { Scenario, ScoreResult, Recording, Message as TypeMessage } from '../content/types';
 import { ScoreCard } from './ScoreCard';
+import { saveRecording } from '../state/recordings';
 
-type Message = { role: 'staff' | 'guest'; text: string; emotion?: string };
+type Message = TypeMessage;
+type AudioDataMap = Record<string, string>; // timestamp -> base64
 
 type Props = {
   scenario: Scenario;
-  onDone: (score: number, seconds: number, usedCards: boolean) => void;
+  onDone: (score: number, seconds: number, usedCards: boolean, recordingId: string) => void;
   onBack: () => void;
   bestTime?: number;
 };
@@ -41,11 +43,13 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       return true;
     }
   });
+  const [audioData, setAudioData] = useState<AudioDataMap>({});
   const recognitionRef = useRef<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const synthRef = useRef(window.speechSynthesis);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const messageTimestampRef = useRef<number>(Date.now());
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,12 +81,14 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
 
   function startScenario() {
     setStarted(true);
-    const opening: Message = { role: 'guest', text: scenario.guestOpeningLine };
+    const timestamp = Date.now();
+    messageTimestampRef.current = timestamp;
+    const opening: Message = { role: 'guest', text: scenario.guestOpeningLine, timestamp };
     setMessages([opening]);
-    speak(scenario.guestOpeningLine);
+    speak(scenario.guestOpeningLine, undefined, timestamp);
   }
 
-  async function speak(text: string, emotion?: string) {
+  async function speak(text: string, emotion?: string, timestamp?: number) {
     // Try ElevenLabs TTS if enabled
     if (useTTS && selectedVoice) {
       try {
@@ -99,6 +105,14 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         if (response.ok) {
           const arrayBuffer = await response.arrayBuffer();
           const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+
+          // Capture audio for recording
+          if (timestamp) {
+            blobToBase64(blob).then((base64) => {
+              setAudioData((prev) => ({ ...prev, [timestamp]: base64 }));
+            });
+          }
+
           const url = URL.createObjectURL(blob);
 
           if (!audioRef.current) {
@@ -201,7 +215,8 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     const text = input.trim();
     if (!text || loading) return;
 
-    const staffMsg: Message = { role: 'staff', text };
+    const timestamp = Date.now();
+    const staffMsg: Message = { role: 'staff', text, timestamp };
     const updated = [...messages, staffMsg];
     setMessages(updated);
     setInput('');
@@ -219,11 +234,18 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         body: JSON.stringify({ scenario, messages: apiMessages }),
       });
       const data = await res.json();
-      const guestMsg: Message = { role: 'guest', text: data.reply || data.text, emotion: data.emotion };
+      const guestTimestamp = Date.now();
+      const guestMsg: Message = {
+        role: 'guest',
+        text: data.reply || data.text,
+        emotion: data.emotion,
+        timestamp: guestTimestamp,
+      };
       setMessages([...updated, guestMsg]);
-      speak(data.reply || data.text, data.emotion);
+      speak(data.reply || data.text, data.emotion, guestTimestamp);
     } catch (err) {
-      setMessages([...updated, { role: 'guest', text: '(Error getting response. Try again.)' }]);
+      const errorTimestamp = Date.now();
+      setMessages([...updated, { role: 'guest', text: '(Error getting response. Try again.)', timestamp: errorTimestamp }]);
     }
     setLoading(false);
   }
@@ -244,7 +266,26 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       });
       const result: ScoreResult = await res.json();
       setScoreResult(result);
-      onDone(result.overall, seconds, usedCards);
+
+      // Save recording if audio was captured
+      let recordingId = '';
+      if (messages.length > 0) {
+        const attemptId = `${scenario.id}-${Date.now()}`;
+        recordingId = attemptId;
+        const recording: Recording = {
+          attemptId,
+          scenarioId: scenario.id,
+          messages,
+          score: result.overall,
+          seconds,
+          usedCards,
+          recordedAt: new Date().toISOString(),
+          audioData: Object.keys(audioData).length > 0 ? audioData : undefined,
+        };
+        saveRecording(recording);
+      }
+
+      onDone(result.overall, seconds, usedCards, recordingId);
     } catch {
       setScoreResult(null);
     }
@@ -470,4 +511,15 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       )}
     </div>
   );
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      resolve(base64.split(',')[1]);
+    };
+    reader.readAsDataURL(blob);
+  });
 }
