@@ -22,6 +22,7 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
 ### Prerequisites
 - **Node.js** 18+ (uses native `import.meta.dirname`)
 - A valid **Anthropic API key** from [console.anthropic.com](https://console.anthropic.com)
+- (Optional) **ElevenLabs API key** from [elevenlabs.io](https://elevenlabs.io/app/api) for premium voices
 
 ### Setup
 
@@ -30,11 +31,11 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
    npm install
    ```
 
-2. **Set your API key:**
+2. **Configure API keys:**
    ```bash
    cp .env.example .env
    # Edit .env and add your ANTHROPIC_API_KEY
-   # Keep MODEL_NAME as claude-haiku-4-5-20251001 (or update to another available model)
+   # (Optional) Add ELEVENLABS_API_KEY for premium text-to-speech
    ```
 
 3. **Run the dev server:**
@@ -62,9 +63,17 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
 - **Score card** showing overall 0–100 score, 5 dimension bars, coaching points, verdict, and timing
 - **Manager dashboard** (PIN-gated, view team stats and scenario performance)
 - **Type-safe models** (GuestTurn with emotion, AnswerOptions, timing)
-- **Backend APIs:** `/api/guest-turn`, `/api/score`, `/api/answer-options`
+- **Backend APIs:** `/api/guest-turn`, `/api/score`, `/api/answer-options`, `/api/tts`, `/api/voices`
 - **State management** with PIN-auth profiles, time/score tracking, localStorage persistence
 - **Tailwind + brand colours** (crimson #960404, teal #039594)
+
+**Phase 3.5: Premium text-to-speech (optional upgrade)**
+- **ElevenLabs integration:**
+  - 5 professional voices with distinct characteristics (Bella, Elli, Chris, Sarah, Charlie)
+  - Emotion-aware voice parameter adjustment per guest state
+  - Voice selector dropdown in role-play screen
+  - Graceful fallback to browser speechSynthesis if API key not configured
+  - User voice preference saved to localStorage
 
 **Phase 2: Content and speech**
 - **3 Scenario content packs (27 scenarios):**
