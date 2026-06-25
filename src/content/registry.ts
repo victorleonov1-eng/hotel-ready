@@ -1,12 +1,12 @@
 import type { ScenarioPack } from './types';
 import frontdesk from './packs/frontdesk.json';
-
-// Import additional packs here as they're added
-// import fbservice from './packs/fbservice.json';
+import fbservice from './packs/fbservice.json';
+import housekeeping from './packs/housekeeping.json';
 
 const packs: ScenarioPack[] = [
   frontdesk as ScenarioPack,
-  // fbservice as ScenarioPack,
+  fbservice as ScenarioPack,
+  housekeeping as ScenarioPack,
 ];
 
 export function getAllPacks(): ScenarioPack[] {

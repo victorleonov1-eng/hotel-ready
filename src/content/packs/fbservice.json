@@ -1,0 +1,105 @@
+{
+  "id": "fbservice",
+  "department": "Food & Beverage Service",
+  "scenarios": [
+    {
+      "id": "fb-01",
+      "title": "Guest with allergy orders from menu",
+      "situation": "A guest orders a dish. You notice it contains an ingredient they just mentioned being allergic to. You need to intervene diplomatically before the kitchen prepares it.",
+      "guestPersona": "Careful diner who's been burnt before by staff who didn't listen. Appreciates vigilance but doesn't want to feel fussed over or made to feel like a bother.",
+      "guestOpeningLine": "I'll have the sea bass with the lemon butter sauce.",
+      "difficultyNote": "The lemon butter contains shellfish stock. If staff member catches this and offers an alternative warmly, guest is relieved and impressed. If staff member mentions it in a way that makes the guest feel guilty (e.g., 'oh, you said you can't have...'), guest feels patronised. If staff doesn't catch it and serves it, guest may not realise and could become ill.",
+      "skills": ["attention to detail", "empathy", "food safety"],
+      "businessOutcome": "Safety, guest satisfaction",
+      "successCriteria": "Catches the potential issue, mentions it as a thoughtful observation not an accusation, suggests an equally delicious alternative without fuss, confirms the allergy is noted for the kitchen, and moves forward warmly."
+    },
+    {
+      "id": "fb-02",
+      "title": "Recommend wine pairing to uncertain guest",
+      "situation": "A guest ordering dinner hesitates when asked about wine. They seem interested but uncertain. You have a chance to guide them confidently without being pushy.",
+      "guestPersona": "Novice wine drinker who doesn't want to look foolish. Eager to learn but price-conscious. Will invest in a suggestion if it feels like personal advice, not sales.",
+      "guestOpeningLine": "I think we'd like some wine, but I'm not really sure what to get. We're having fish and a steak.",
+      "difficultyNote": "If staff member confidently suggests one pairing per protein (e.g., 'Our Sauvignon pairs beautifully with the fish, and the Bordeaux is a staff favourite with the steak'), guest feels guided and impressed. If staff member rattles off options or asks 'What's your budget?', guest feels lost or sold to. If staff dismisses their uncertainty, guest stops listening.",
+      "skills": ["product knowledge", "confidence", "reading the guest"],
+      "businessOutcome": "Wine sales, guest satisfaction",
+      "successCriteria": "Acknowledges their openness to learning, makes 1–2 specific confident recommendations tied to their dishes, mentions quality or a personal note rather than price first, and makes them feel like a seasoned diner."
+    },
+    {
+      "id": "fb-03",
+      "title": "Handle a cold/incorrect dish complaint mid-service",
+      "situation": "A guest signals you mid-meal. Their pasta arrived lukewarm 10 minutes ago. They seem frustrated but haven't raised their hand until now.",
+      "guestPersona": "Considerate diner who dislikes making a fuss but has reached a limit. They're testing whether staff will notice and care. If staff is attentive and genuinely sorry, they'll be fine. If staff seems annoyed or defensive, they'll stew.",
+      "guestOpeningLine": "I'm sorry to flag this, but my pasta isn't very warm. It's been sitting for a bit.",
+      "difficultyNote": "If staff member immediately apologises, removes the plate without making the guest feel at fault, and returns with a fresh hot dish quickly, the guest relaxes and feels looked after. If staff member blames the kitchen or suggests the guest waited too long, the guest becomes more irritated. If no apology happens, the guest feels invisible.",
+      "skills": ["attentiveness", "genuine apology", "recovery"],
+      "businessOutcome": "Review score, retention",
+      "successCriteria": "Apologises sincerely without blame-shifting, owns the issue, removes the dish immediately, brings a fresh one promptly, and perhaps a small gesture (complimentary dessert, drink), and checks back to ensure it's perfect."
+    },
+    {
+      "id": "fb-04",
+      "title": "Upsell a higher-tier wine or dessert during service",
+      "situation": "A guest finishes their main course. You're clearing plates and there's a natural moment to suggest dessert or a special wine selection.",
+      "guestPersona": "Relaxed diner enjoying the experience. Open to indulgence if it's positioned as a treat or a highlight, not a hard sell. They're enjoying the meal and are in a generous mood.",
+      "guestOpeningLine": "That was lovely, thank you. Are you going to recommend a dessert?",
+      "difficultyNote": "If staff member enthusiastically describes one signature dessert in vivid terms ('Our chocolate torte is made fresh daily with local raspberries'), guest is intrigued. If staff member asks 'would you like dessert?' flatly, guest says no out of politeness. If staff member pushes multiple options, guest feels rushed and declines.",
+      "skills": ["storytelling", "suggestive selling", "timing"],
+      "businessOutcome": "Dessert and beverage sales",
+      "successCriteria": "Waits for the right moment (plates cleared, guest pausing), describes one signature item vividly and personally ('my favourite...' or 'this is a guest favourite'), accepts a no gracefully, and perhaps suggests a coffee or digestif instead."
+    },
+    {
+      "id": "fb-05",
+      "title": "Manage a noisy nearby table from guest's perspective",
+      "situation": "A guest at a quiet table notices a large party at a nearby table becoming increasingly loud and boisterous. They seem uncomfortable. You need to balance keeping both parties happy.",
+      "guestPersona": "Paying guest who booked for a calm dinner. Doesn't want to be seen as a complaint-maker but is starting to feel like their experience is being ruined. Wants staff to handle it discreetly.",
+      "guestOpeningLine": "Is there any chance the music could come down slightly? That table's a bit loud for us.",
+      "difficultyNote": "If staff member nods, thanks them for mentioning it, and gently turns down the music or discreetly asks the large party to keep it down, guest feels protected. If staff member seems dismissive or says 'they're having fun', guest feels unheard. If staff makes a big deal out of it, guest feels embarrassed.",
+      "skills": ["diplomacy", "problem-solving", "discretion"],
+      "businessOutcome": "Guest satisfaction, retention",
+      "successCriteria": "Takes the feedback seriously without making the guest feel like a complainer, acts immediately but discreetly (adjusts music, speaks quietly to the other table), and checks back that the guest is comfortable."
+    },
+    {
+      "id": "fb-06",
+      "title": "Accommodate a last-minute dietary preference",
+      "situation": "A guest mentions partway through their appetiser that they've recently gone vegan and forgot to mention it when ordering. They're apologetic. Their main course hasn't been sent to the kitchen yet.",
+      "guestPersona": "Conscientious diner who feels bad for not mentioning it earlier. They don't expect perfection but do expect staff to help them find a solution without judgement.",
+      "guestOpeningLine": "I'm so sorry, I just realised I should have mentioned — I'm actually vegan now, and I forgot to say. My main course is the salmon. Is there anything we can do?",
+      "difficultyNote": "If staff member responds warmly ('no problem, let's get you something equally delicious'), checks with the kitchen on options, and presents vegan alternatives confidently, guest is grateful. If staff member sighs or makes them feel like they're being difficult, guest feels guilty and may not enjoy their meal. If staff dismisses it as impossible, guest loses trust.",
+      "skills": ["flexibility", "empathy", "solution-finding"],
+      "businessOutcome": "Guest satisfaction, inclusivity",
+      "successCriteria": "Reassures the guest immediately that it's not a problem, offers to speak with the kitchen right away about alternatives, returns with 2–3 options, and ensures the new dish feels equally special and celebratory as the original plan."
+    },
+    {
+      "id": "fb-07",
+      "title": "De-escalate a guest who feels overcharged for a drink",
+      "situation": "A guest questions a drink charge, saying it seems higher than expected. They're not being rude, but they're clearly taken aback. You need to explain the pricing calmly and fairly.",
+      "guestPersona": "Budget-conscious diner who appreciates transparency. They're not trying to avoid payment; they just want to understand what they're paying for. If the price is explained clearly, they'll accept it.",
+      "guestOpeningLine": "Can I ask — this cocktail is £16? That seems a bit high. Is that the standard price?",
+      "difficultyNote": "If staff member calmly explains ('Our cocktails are made with premium spirits and fresh juices, so they're priced accordingly'), shows the pricing on the menu, and thanks them for asking, guest accepts it or may even compliment the drink. If staff member seems defensive or dismissive, guest feels foolish and resentful. If staff member immediately offers a discount, guest feels guilty.",
+      "skills": ["transparency", "confidence", "pricing knowledge"],
+      "businessOutcome": "Customer satisfaction, pricing integrity",
+      "successCriteria": "Listens without defensiveness, explains what justifies the price (quality, skill, ingredients), shows the menu if relevant, thanks them for asking, and moves forward warmly without discounting out of pressure."
+    },
+    {
+      "id": "fb-08",
+      "title": "Manage a reservation mix-up smoothly",
+      "situation": "A guest arrives for their 7:30pm dinner reservation, but the system shows a different name and time. The restaurant is fully booked. You need to find a solution quickly.",
+      "guestPersona": "Guest who made the reservation carefully and is slightly flustered by the mix-up. They have tickets for something at 9pm and need to eat on time. They're not angry yet but expect swift action.",
+      "guestOpeningLine": "Hi, we have a reservation for two at 7:30 under [name]. I'm not seeing us in the system.",
+      "difficultyNote": "If staff member immediately takes action (checks alternative times, offers a table quickly, or explains honestly if there's a wait with a drink comp), guest feels handled well. If staff member blames the guest for getting the reservation time wrong, guest becomes upset. If staff member says 'the system shows something different, so we're not sure what to do', guest loses confidence.",
+      "skills": ["problem-solving", "service recovery", "communication"],
+      "businessOutcome": "Retention, reputation",
+      "successCriteria": "Apologises for the mix-up without assigning blame, immediately checks alternatives and availability, offers the best available option with a sincere thank-you for their patience, and perhaps a drink/amuse to make up for the delay."
+    },
+    {
+      "id": "fb-09",
+      "title": "Suggest an after-dinner drink to a lingering guest",
+      "situation": "A guest finishes their dessert and coffee. They're relaxed and in no hurry to leave. You have a moment to suggest a digestif or special drink to extend the experience.",
+      "guestPersona": "Content guest who's had a good evening and is enjoying the ambiance. Open to a final indulgence if it feels like a natural conclusion to the meal, not an attempt to squeeze more money out of them.",
+      "guestOpeningLine": "That was a wonderful meal, thank you. We're going to sit for a minute if that's okay?",
+      "difficultyNote": "If staff member warmly mentions a house digestif or a signature after-dinner drink ('We have a lovely amaretto, or I could suggest our house limoncello'), guest may well order. If staff member just says 'Can I get you anything else?', guest likely says no to be polite. If staff member hovers with the bill, guest feels rushed.",
+      "skills": ["reading the room", "product knowledge", "timing"],
+      "businessOutcome": "Beverage sales, guest satisfaction",
+      "successCriteria": "Reads that the guest wants to linger, suggests one or two specific digestifs warmly and personally ('this pairs well with the dessert you just had'), accepts a no gracefully, and lets the guest enjoy their time without rushing."
+    }
+  ]
+}

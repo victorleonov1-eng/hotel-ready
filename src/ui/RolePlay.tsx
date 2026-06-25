@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Scenario, ScoreResult } from '../content/types';
 import { ScoreCard } from './ScoreCard';
 
-type Message = { role: 'staff' | 'guest'; text: string };
+type Message = { role: 'staff' | 'guest'; text: string; emotion?: string };
 
 type Props = {
   scenario: Scenario;
@@ -46,10 +46,31 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     speak(scenario.guestOpeningLine);
   }
 
-  function speak(text: string) {
+  function speak(text: string, emotion?: string) {
     try {
       const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.95;
+
+      // Adjust voice characteristics based on guest emotion
+      switch (emotion) {
+        case 'angry':
+        case 'irritated':
+          utter.rate = 0.75; // Slower, more deliberate
+          utter.pitch = 0.8; // Lower pitch
+          break;
+        case 'warming':
+        case 'satisfied':
+          utter.rate = 1.1; // Faster, more upbeat
+          utter.pitch = 1.2; // Higher pitch
+          break;
+        case 'anxious':
+          utter.rate = 1.15; // Slightly faster due to nervousness
+          utter.pitch = 1.0;
+          break;
+        default: // neutral
+          utter.rate = 0.95;
+          utter.pitch = 1.0;
+      }
+
       synthRef.current.speak(utter);
     } catch {}
   }
@@ -100,9 +121,9 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         body: JSON.stringify({ scenario, messages: apiMessages }),
       });
       const data = await res.json();
-      const guestMsg: Message = { role: 'guest', text: data.reply || data.text };
+      const guestMsg: Message = { role: 'guest', text: data.reply || data.text, emotion: data.emotion };
       setMessages([...updated, guestMsg]);
-      speak(data.reply || data.text);
+      speak(data.reply || data.text, data.emotion);
     } catch (err) {
       setMessages([...updated, { role: 'guest', text: '(Error getting response. Try again.)' }]);
     }
@@ -184,22 +205,33 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       ) : (
         <>
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'staff' ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
-                    m.role === 'staff'
-                      ? 'bg-teal text-white'
-                      : 'bg-crimson-light text-crimson-dark'
-                  }`}
-                >
-                  <span className="text-xs font-medium opacity-70 block mb-0.5">
-                    {m.role === 'staff' ? 'You' : 'Guest'}
-                  </span>
-                  {m.text}
+            {messages.map((m, i) => {
+              const emotionEmoji = {
+                angry: '😠',
+                irritated: '😤',
+                neutral: '😐',
+                warming: '🙂',
+                satisfied: '😊',
+                anxious: '😟',
+              } as Record<string, string>;
+
+              return (
+                <div key={i} className={`flex ${m.role === 'staff' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
+                      m.role === 'staff'
+                        ? 'bg-teal text-white'
+                        : 'bg-crimson-light text-crimson-dark'
+                    }`}
+                  >
+                    <span className="text-xs font-medium opacity-70 block mb-0.5 flex items-center gap-1">
+                      {m.role === 'staff' ? 'You' : 'Guest'} {m.emotion && emotionEmoji[m.emotion]}
+                    </span>
+                    {m.text}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-crimson-light text-crimson-dark rounded-xl px-3 py-2 text-sm animate-pulse">

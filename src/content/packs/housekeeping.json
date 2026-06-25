@@ -1,0 +1,105 @@
+{
+  "id": "housekeeping",
+  "department": "Housekeeping / Room Service",
+  "scenarios": [
+    {
+      "id": "hk-01",
+      "title": "Guest requests room cleaning while they're still in the room",
+      "situation": "A guest calls requesting housekeeping. They mention they're working in the room and would like it cleaned while they're there, which is unusual. You need to assess whether this is feasible and what compromises might work.",
+      "guestPersona": "Busy professional who's working from their room. They genuinely want the room cleaned but haven't thought about the logistics. They'll appreciate flexibility and a practical solution.",
+      "guestOpeningLine": "Hi, could housekeeping come by to clean the room? I'm actually working here today, so I'll be in, but I'm fine with them working around me.",
+      "difficultyNote": "If staff member acknowledges the awkwardness, offers a partial solution (e.g., 'we can refresh the bathroom and change towels now, and do a full clean later'), and confirms timing, guest feels heard. If staff member insists the guest must leave, guest feels inconvenienced. If staff member suggests it's impossible, guest becomes frustrated.",
+      "skills": ["flexibility", "problem-solving", "communication"],
+      "businessOutcome": "Guest satisfaction, operational efficiency",
+      "successCriteria": "Acknowledges the request is workable with adjustments, suggests a phased approach (bathroom and refresh now, full clean later), confirms timing that works with the guest's schedule, and thanks them for being considerate about the disruption."
+    },
+    {
+      "id": "hk-02",
+      "title": "Guest reports missing or damaged item in room",
+      "situation": "A guest calls to report that a pillow is stained and they need a replacement, and they also mention a lamp might be broken. They're not angry, just noting issues.",
+      "guestPersona": "Observant guest who wants to be helpful by reporting problems. They don't expect the items to be replaced instantly but do expect staff to take them seriously and follow up.",
+      "guestOpeningLine": "Hi, I'm in room 407. There's a stain on one of the pillows and I think the desk lamp might be broken. Could someone look at these?",
+      "difficultyNote": "If staff member acknowledges both issues, sends someone promptly to assess, and brings replacements or repairs quickly, guest feels looked after. If staff member takes notes but seems dismissive, guest worries the issues won't get addressed. If staff member blames the guest, guest becomes defensive.",
+      "skills": ["listening", "follow-through", "service recovery"],
+      "businessOutcome": "Room quality, guest satisfaction",
+      "successCriteria": "Acknowledges each issue specifically, thanks the guest for reporting, sends maintenance/housekeeping within 10 minutes, replaces the pillow immediately, and updates the guest on the lamp status."
+    },
+    {
+      "id": "hk-03",
+      "title": "Room service order takes longer than expected — guest is frustrated",
+      "situation": "A guest ordered room service 45 minutes ago. The expected time was 25 minutes. They call the kitchen/reception to follow up. They're starting to get frustrated.",
+      "guestPersona": "Guest with plans or time constraints. They don't mind waiting if they know what's happening, but uncertainty and no communication frustrate them. They want a realistic update and a genuine apology.",
+      "guestOpeningLine": "Hi, I ordered room service almost 45 minutes ago and it still isn't here. What's happening?",
+      "difficultyNote": "If staff member sincerely apologises, explains the specific reason (busy kitchen, special preparation, unavoidable delay), gives an exact ETA ('5 more minutes'), and offers a small gesture (complimentary item, discount), guest feels mollified. If staff member seems annoyed or defensive, guest becomes more irritated. If there's no honest explanation, guest loses trust.",
+      "skills": ["accountability", "transparency", "recovery"],
+      "businessOutcome": "Guest satisfaction, retention",
+      "successCriteria": "Apologises sincerely without excuses, explains the specific reason honestly, provides a clear ETA, offers a token gesture, and ensures the food arrives at the promised time or provides a discount if it doesn't."
+    },
+    {
+      "id": "hk-04",
+      "title": "Guest needs laundry/pressing done urgently and wants it fast",
+      "situation": "A guest has an important meeting tomorrow morning and needs a jacket cleaned and pressed by 8am. It's already 7pm. The laundry service has standard turnaround times but might be able to rush it if they ask.",
+      "guestPersona": "Guest with a professional commitment. They're not demanding but they are anxious about the timeline. They appreciate honesty about what's feasible and willingness to try.",
+      "guestOpeningLine": "I have a big meeting tomorrow at 9am and my suit jacket needs cleaning and pressing. Is there any way you could turn it around by 8am?",
+      "difficultyNote": "If staff member immediately offers to check with laundry ('let me call them and see if it's possible'), then returns with either a yes with a cost, or an honest no with an alternative (dry cleaner downstairs, next-day service, partial pressing tonight), guest feels supported. If staff member says 'it's impossible' without trying, guest feels let down. If there's no honest conversation, guest doubts whether it's really impossible.",
+      "skills": ["can-do attitude", "problem-solving", "honesty"],
+      "businessOutcome": "Guest satisfaction, repeat business",
+      "successCriteria": "Takes the request seriously, checks immediately with laundry without the guest waiting, either secures the rush service or honestly explains why it's not possible and offers an alternative solution (nearby cleaner, partial service, compensation)."
+    },
+    {
+      "id": "hk-05",
+      "title": "Guest complains about noise from the room next door",
+      "situation": "A guest calls late evening complaining about loud noise from the adjacent room. They're trying to sleep and are frustrated. You need to handle the situation without escalating it.",
+      "guestPersona": "Tired guest who just wants peace. They're not trying to get the other guest in trouble; they just want the noise to stop. They expect hotel staff to handle it discreetly and effectively.",
+      "guestOpeningLine": "I'm sorry to call so late, but there's a lot of noise coming from the room next to me and I'm trying to sleep. Can someone do something?",
+      "difficultyNote": "If staff member apologises, thanks them for calling, and immediately sends someone to discreetly ask the adjacent room to keep it down, guest usually feels resolved. If staff member seems annoyed at being called or says 'there's not much I can do', guest becomes more frustrated. If staff offers to move the guest to another room without asking, guest may feel like the bother is being pushed onto them.",
+      "skills": ["empathy", "discretion", "swift action"],
+      "businessOutcome": "Guest satisfaction, retention",
+      "successCriteria": "Apologises sincerely for the disruption, thanks the guest for calling, immediately addresses the issue discreetly (knocks on the adjacent door, asks them to keep it down), follows up with the original guest within a few minutes to confirm it's resolved, and offers a gesture if the disruption was significant."
+    },
+    {
+      "id": "hk-06",
+      "title": "Guest has an allergy and notices dust/allergen in their room",
+      "situation": "A guest with a dust allergy notices the room hasn't been thoroughly cleaned. They're itchy and uncomfortable. They call to report this and need immediate attention.",
+      "guestPersona": "Guest with a real health concern. They're not being fussy; they genuinely can't be comfortable in the room as it is. They need staff to treat this as a priority, not an inconvenience.",
+      "guestOpeningLine": "Hi, I have a dust allergy and I've noticed there's quite a bit of dust under the bed and on the blinds. My eyes and throat are itching. Can housekeeping come and deep-clean these areas right away?",
+      "difficultyNote": "If staff member immediately takes it seriously ('absolutely, that's a health issue'), sends housekeeping within 10 minutes, and ensures they use allergy-friendly practices (HEPA vacuums, damp dusting), guest feels cared for. If staff member dismisses it as a preference, guest feels unheard and unwell. If the response is slow, guest's health worsens and frustration grows.",
+      "skills": ["empathy", "prioritisation", "health awareness"],
+      "businessOutcome": "Guest health, satisfaction, liability awareness",
+      "successCriteria": "Treats the allergy as a health priority not a preference, sends housekeeping immediately with appropriate tools and techniques, stays available for follow-up, and offers to move the guest if the room can't be cleaned adequately right away."
+    },
+    {
+      "id": "hk-07",
+      "title": "Room service brought the wrong order or forgot items",
+      "situation": "Room service arrives. The guest ordered a salad with dressing on the side, but it came with dressing already mixed in. They also ordered a side of fries but they're not in the bag.",
+      "guestPersona": "Guest who has specific preferences and is disappointed but not angry — just frustrated that they have to send food back. They want a quick, hassle-free replacement.",
+      "guestOpeningLine": "I'm sorry, but this isn't quite right. The dressing should have been on the side, and I don't see the fries.",
+      "difficultyNote": "If staff member immediately apologises, takes the plate back without blame-shifting, confirms the correct order, and returns promptly with the right items, guest is satisfied. If staff member argues ('the salad is fine like this') or makes the guest feel at fault ('you should have been more specific'), guest becomes upset. If the replacement takes too long, guest loses their appetite.",
+      "skills": ["accountability", "service recovery", "speed"],
+      "businessOutcome": "Guest satisfaction, food quality",
+      "successCriteria": "Apologises immediately without defensiveness, takes responsibility for the error, confirms the correct order by repeating it back, and returns with the correct items within 10 minutes. Offers a gesture (complimentary dessert or drink) to acknowledge the inconvenience."
+    },
+    {
+      "id": "hk-08",
+      "title": "Guest requests turn-down service and has specific preferences",
+      "situation": "A guest returning from dinner calls requesting turn-down service. They mention they want the blinds fully closed, bedside lighting adjusted (not too bright), and a 'do not disturb' sign left on the door.",
+      "guestPersona": "Guest who's detailed about their sleep environment. They're not being difficult; they're being clear about what helps them sleep well. They appreciate staff who listen and execute those details.",
+      "guestOpeningLine": "Would it be possible to do turn-down service in my room? I have a few specific requests if that's okay.",
+      "difficultyNote": "If staff member enthusiastically notes all the requests and executes them exactly, guest feels pampered and sleeps better. If staff member seems to view the requests as an inconvenience, guest feels like they're being difficult. If staff forgets one request, the guest's comfort is compromised.",
+      "skills": ["attention to detail", "personalisation", "patience"],
+      "businessOutcome": "Guest comfort, satisfaction",
+      "successCriteria": "Welcomes the specific requests enthusiastically, writes them down to ensure accuracy, executes each request exactly (closes blinds fully, adjusts lighting to the preference, places DND sign), and thanks the guest for the guidance."
+    },
+    {
+      "id": "hk-09",
+      "title": "Guest checks out early due to dissatisfaction with room",
+      "situation": "A guest calls at 10am the day after arrival saying the room has a smell they find unpleasant and they want to check out and leave. They've lost trust in the room quality and don't want another room. You need to try to recover the situation or at least part of it.",
+      "guestPersona": "Guest whose experience has been soured. They're not trying to be difficult; they've made a decision and are ready to go. But they're also willing to give staff a chance if a genuine solution is offered quickly.",
+      "guestOpeningLine": "Hi, I'm very sorry, but I need to check out. The room has a strange smell and I don't feel comfortable staying. I'd like to leave this morning.",
+      "difficultyNote": "If staff member immediately acknowledges the concern, offers a different room without charge (or a partial refund if moving isn't the issue), and inspects the original room to prevent future issues, guest might stay or at least feel respected. If staff member is defensive or dismissive, guest checks out and leaves a negative review. If staff offers no solution, guest leaves frustrated.",
+      "skills": ["service recovery", "empathy", "problem-solving"],
+      "businessOutcome": "Retention, reputation, operational learning",
+      "successCriteria": "Apologises sincerely and immediately, takes the concern seriously without defensiveness, offers a genuine solution (different room or partial refund), inspects the original room to identify the issue, and follows up later to learn what went wrong so it doesn't happen again."
+    }
+  ]
+}

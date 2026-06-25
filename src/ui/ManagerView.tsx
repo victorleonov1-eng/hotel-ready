@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loadProfiles } from '../state/profiles';
+import { loadProfiles, deleteProfile } from '../state/profiles';
 import { getAllScenarios } from '../content/registry';
 
 const DEFAULT_MANAGER_PIN = '0000';
@@ -7,6 +7,8 @@ const DEFAULT_MANAGER_PIN = '0000';
 type ManagerViewProps = {
   onBack: () => void;
 };
+
+type ViewMode = 'dashboard' | 'staff-detail';
 
 export function ManagerView({ onBack }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
@@ -18,6 +20,9 @@ export function ManagerView({ onBack }: ManagerViewProps) {
       return DEFAULT_MANAGER_PIN;
     }
   });
+  const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
+  const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
+  const [profiles, setProfiles] = useState(loadProfiles());
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +30,19 @@ export function ManagerView({ onBack }: ManagerViewProps) {
       setAuthenticated(true);
       setPinInput('');
     }
+  };
+
+  const handleDeleteProfile = (firstName: string, lastName: string) => {
+    if (confirm(`Delete profile for ${firstName} ${lastName}? This cannot be undone.`)) {
+      deleteProfile(firstName, lastName);
+      setProfiles(loadProfiles());
+      setViewMode('dashboard');
+    }
+  };
+
+  const handleViewStaffDetail = (firstName: string, lastName: string) => {
+    setSelectedStaff(`${firstName}|${lastName}`);
+    setViewMode('staff-detail');
   };
 
   if (!authenticated) {
@@ -60,8 +78,77 @@ export function ManagerView({ onBack }: ManagerViewProps) {
     );
   }
 
-  const profiles = loadProfiles();
   const scenarios = getAllScenarios();
+
+  if (viewMode === 'staff-detail' && selectedStaff) {
+    const [firstName, lastName] = selectedStaff.split('|');
+    const staff = profiles.find((p) => p.firstName === firstName && p.lastName === lastName);
+    if (!staff) return null;
+
+    const staffScenarios = scenarios.map((s) => {
+      const attempts = staff.attempts.filter((a) => a.scenarioId === s.id);
+      const scores = attempts.map((a) => a.score);
+      const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+      const best = scores.length ? Math.max(...scores) : null;
+      return { scenario: s, avg, best, attempts: attempts.length, lastAttempt: attempts[attempts.length - 1] };
+    });
+
+    return (
+      <div className="px-4 py-4 max-w-3xl mx-auto">
+        <button
+          onClick={() => setViewMode('dashboard')}
+          className="text-sm text-crimson underline mb-4"
+        >
+          &larr; Back to Dashboard
+        </button>
+        <h2 className="text-2xl font-bold text-crimson-dark mb-1">
+          {staff.firstName} {staff.lastName}
+        </h2>
+        <div className="text-sm text-gray-600 mb-6">
+          <div>{staff.position} · {staff.department}</div>
+          <div>{staff.attempts.length} total attempt{staff.attempts.length !== 1 ? 's' : ''}</div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="font-semibold text-crimson-dark">Scenario Performance</h3>
+          {staffScenarios.filter((s) => s.attempts > 0).length === 0 ? (
+            <p className="text-sm text-gray-500">No attempts yet</p>
+          ) : (
+            staffScenarios.map(({ scenario, avg, best, attempts, lastAttempt }) => (
+              <div key={scenario.id} className="bg-white border rounded p-4">
+                <h4 className="font-semibold text-crimson-dark text-sm">{scenario.title}</h4>
+                {attempts > 0 && (
+                  <div className="text-xs text-gray-600 mt-2 grid grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-gray-500">Attempts</div>
+                      <div className="font-semibold text-lg">{attempts}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Best Score</div>
+                      <div className="font-semibold text-lg">{best}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Average</div>
+                      <div className="font-semibold text-lg">{avg}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="mt-6 pt-6 border-t">
+          <button
+            onClick={() => handleDeleteProfile(staff.firstName, staff.lastName)}
+            className="text-sm text-red-600 hover:text-red-700"
+          >
+            Delete Profile
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const scenarioStats = scenarios.map((s) => {
     const scores = profiles
@@ -74,7 +161,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const totalAttempts = profiles.reduce((sum, p) => sum + p.attempts.length, 0);
 
   return (
-    <div className="px-4 py-4 max-w-2xl mx-auto">
+    <div className="px-4 py-4 max-w-4xl mx-auto">
       <button onClick={onBack} className="text-sm text-crimson underline mb-4">
         &larr; Back
       </button>
@@ -83,10 +170,10 @@ export function ManagerView({ onBack }: ManagerViewProps) {
         {profiles.length} staff member{profiles.length !== 1 ? 's' : ''} · {totalAttempts} total attempt{totalAttempts !== 1 ? 's' : ''}
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
           <h3 className="font-semibold text-crimson-dark mb-3">Scenario Performance</h3>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {scenarioStats.map(({ scenario, avg, best, attempts }) => (
               <div key={scenario.id} className="bg-white border rounded p-3 text-sm">
                 <h4 className="font-semibold text-crimson-dark text-xs">{scenario.title}</h4>
@@ -107,17 +194,21 @@ export function ManagerView({ onBack }: ManagerViewProps) {
 
         <div>
           <h3 className="font-semibold text-crimson-dark mb-3">Team Members</h3>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {profiles.length === 0 ? (
               <p className="text-sm text-gray-500 bg-gray-50 p-3 rounded">No staff members yet</p>
             ) : (
               profiles.map((p) => (
-                <div key={`${p.firstName}-${p.lastName}`} className="bg-white border rounded p-3 text-sm">
+                <div
+                  key={`${p.firstName}-${p.lastName}`}
+                  className="bg-white border rounded p-3 text-sm cursor-pointer hover:border-crimson"
+                  onClick={() => handleViewStaffDetail(p.firstName, p.lastName)}
+                >
                   <div className="font-semibold text-crimson-dark">
                     {p.firstName} {p.lastName}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">
-                    <div>{p.position} · {p.department}</div>
+                    <div>{p.position}</div>
                     <div>{p.attempts.length} attempt{p.attempts.length !== 1 ? 's' : ''}</div>
                   </div>
                 </div>
