@@ -13,6 +13,12 @@ type Props = {
 
 type AnswerOption = { text: string; rank: 1 | 2 | 3 | 4 | 5 };
 
+type Voice = {
+  id: string;
+  name: string;
+  value: string;
+};
+
 export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -26,10 +32,20 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState<AnswerOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState('EXAVITQu4vr4xnSDxMaL'); // Bella
+  const [useTTS, setUseTTS] = useState(() => {
+    try {
+      return localStorage.getItem('hotelready.usetts') !== 'false';
+    } catch {
+      return true;
+    }
+  });
   const recognitionRef = useRef<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const synthRef = useRef(window.speechSynthesis);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +60,21 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     }
   }, [started, scoreResult]);
 
+  useEffect(() => {
+    // Load available voices from server
+    fetch('/api/voices')
+      .then((res) => res.json())
+      .then((data) => {
+        const voiceList = Object.entries(data).map(([key, value]: any) => ({
+          id: value.id,
+          name: value.name,
+          value: value.id,
+        }));
+        setVoices(voiceList);
+      })
+      .catch((err) => console.log('Could not load voices, using browser TTS'));
+  }, []);
+
   function startScenario() {
     setStarted(true);
     const opening: Message = { role: 'guest', text: scenario.guestOpeningLine };
@@ -51,7 +82,46 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     speak(scenario.guestOpeningLine);
   }
 
-  function speak(text: string, emotion?: string) {
+  async function speak(text: string, emotion?: string) {
+    // Try ElevenLabs TTS if enabled
+    if (useTTS && selectedVoice) {
+      try {
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            voiceId: selectedVoice,
+            emotion,
+          }),
+        });
+
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+
+          if (!audioRef.current) {
+            audioRef.current = new Audio();
+          }
+
+          audioRef.current.src = url;
+          audioRef.current.play().catch((err) => {
+            console.log('Audio playback error, falling back to browser TTS:', err);
+            speakBrowser(text, emotion);
+          });
+          return;
+        }
+      } catch (err) {
+        console.log('ElevenLabs TTS error, falling back to browser TTS:', err);
+      }
+    }
+
+    // Fallback to browser speechSynthesis
+    speakBrowser(text, emotion);
+  }
+
+  function speakBrowser(text: string, emotion?: string) {
     try {
       const utter = new SpeechSynthesisUtterance(text);
 
@@ -213,6 +283,44 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         </button>
         <h3 className="font-bold text-crimson-dark text-sm">{scenario.title}</h3>
         <p className="text-xs text-gray-500 mt-1">{scenario.situation}</p>
+
+        {!started && (
+          <div className="mt-3 space-y-2">
+            <label className="block">
+              <div className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                🎙️ Guest Voice {voices.length > 0 && '(Premium TTS)'}
+              </div>
+              {voices.length > 0 ? (
+                <select
+                  value={selectedVoice}
+                  onChange={(e) => setSelectedVoice(e.target.value)}
+                  className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-crimson"
+                >
+                  {voices.map((v) => (
+                    <option key={v.id} value={v.id}>{v.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="text-xs text-gray-500 italic">Using browser voice</div>
+              )}
+            </label>
+            {voices.length > 0 && (
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={useTTS}
+                  onChange={(e) => {
+                    setUseTTS(e.target.checked);
+                    localStorage.setItem('hotelready.usetts', e.target.checked ? 'true' : 'false');
+                  }}
+                  className="rounded"
+                />
+                <span className="text-gray-600">Enable premium voice</span>
+              </label>
+            )}
+          </div>
+        )}
+
         {started && (
           <div className="mt-2 text-sm font-semibold text-teal">
             ⏱ {formatTime(seconds)}

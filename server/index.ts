@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { chatWithGuest, scoreConversation, getAnswerOptions } from './anthropic';
 import { guestSystemPrompt, scorerSystemPrompt, answerOptionsPrompt } from './prompts';
+import { textToSpeechElevenLabs, AVAILABLE_VOICES } from './elevenlabs';
 import type { Scenario, ScoreResult } from '../src/content/types';
 
 const app = express();
@@ -62,6 +63,36 @@ app.post('/api/answer-options', async (req, res) => {
     console.error('answer-options error:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post('/api/tts', async (req, res) => {
+  try {
+    const { text, voiceId, emotion } = req.body as {
+      text: string;
+      voiceId?: string;
+      emotion?: string;
+    };
+
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const audioBuffer = await textToSpeechElevenLabs(text, voiceId, emotion);
+
+    if (!audioBuffer) {
+      return res.status(503).json({ error: 'TTS service unavailable, use browser fallback' });
+    }
+
+    res.set('Content-Type', 'audio/mpeg');
+    res.send(Buffer.from(audioBuffer));
+  } catch (err: any) {
+    console.error('tts error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/voices', (_req, res) => {
+  res.json(AVAILABLE_VOICES);
 });
 
 const distPath = path.join(import.meta.dirname, '..', 'dist');
