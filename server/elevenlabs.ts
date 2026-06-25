@@ -49,9 +49,12 @@ export async function textToSpeechElevenLabs(
   emotion?: string
 ): Promise<ArrayBuffer | null> {
   if (!API_KEY) {
-    console.warn('ElevenLabs API key not configured, falling back to browser TTS');
+    console.warn('ElevenLabs API key not configured (ELEVENLABS_API_KEY env var missing)');
     return null;
   }
+
+  console.log(`[ElevenLabs] Using API key: ${API_KEY.substring(0, 10)}...`);
+  console.log(`[ElevenLabs] Voice ID: ${voiceId}`);
 
   try {
     const voiceSettings = emotionToVoiceParams(emotion);
@@ -70,7 +73,10 @@ export async function textToSpeechElevenLabs(
     });
 
     if (!response.ok) {
-      console.error(`ElevenLabs API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`ElevenLabs API error: ${response.status} ${response.statusText}`, errorText);
+      console.error(`Voice ID used: ${voiceId}`);
+      console.error(`API URL: ${API_URL}/text-to-speech/${voiceId}`);
       return null;
     }
 

@@ -78,11 +78,15 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'Text is required' });
     }
 
+    console.log(`[TTS] Requesting audio for voice: ${voiceId || 'default'}, emotion: ${emotion || 'none'}`);
     const audioBuffer = await textToSpeechElevenLabs(text, voiceId, emotion);
 
     if (!audioBuffer) {
+      console.error('[TTS] Failed to generate audio - ElevenLabs returned null');
       return res.status(503).json({ error: 'TTS service unavailable, use browser fallback' });
     }
+
+    console.log('[TTS] Successfully generated audio');
 
     res.set('Content-Type', 'audio/mpeg');
     res.send(Buffer.from(audioBuffer));
