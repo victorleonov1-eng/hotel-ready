@@ -11,6 +11,8 @@ type Props = {
   bestTime?: number;
 };
 
+type AnswerOption = { text: string; rank: 1 | 2 | 3 | 4 | 5 };
+
 export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -21,6 +23,9 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [listening, setListening] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [usedCards, setUsedCards] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [options, setOptions] = useState<AnswerOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
   const recognitionRef = useRef<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const synthRef = useRef(window.speechSynthesis);
@@ -73,6 +78,29 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
 
       synthRef.current.speak(utter);
     } catch {}
+  }
+
+  async function getAnswerOptions() {
+    if (messages.length === 0) return;
+    setOptionsLoading(true);
+    const transcript = messages
+      .map((m) => `${m.role === 'staff' ? 'STAFF' : 'GUEST'}: ${m.text}`)
+      .join('\n');
+
+    try {
+      const res = await fetch('/api/answer-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario, transcript }),
+      });
+      const data = await res.json();
+      setOptions(Array.isArray(data) ? data : data.options || []);
+      setShowOptions(true);
+      setUsedCards(true);
+    } catch (err) {
+      console.error('Error fetching options:', err);
+    }
+    setOptionsLoading(false);
   }
 
   function toggleMic() {
@@ -247,6 +275,39 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
               <div className="text-center text-crimson font-medium animate-pulse">Scoring your performance...</div>
             ) : (
               <>
+                {showOptions && options.length > 0 && (
+                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-blue-900">Suggested responses (ranked by effectiveness)</span>
+                      <button
+                        onClick={() => setShowOptions(false)}
+                        className="text-xs text-blue-600 hover:text-blue-900"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {options
+                        .sort((a, b) => b.rank - a.rank)
+                        .map((opt, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setInput(opt.text);
+                              setShowOptions(false);
+                            }}
+                            className="w-full text-left text-sm p-2 bg-white border border-blue-100 rounded hover:bg-blue-50 transition"
+                          >
+                            <div className="flex items-start gap-2">
+                              <span className="font-bold text-blue-600 text-xs min-w-fit">★{opt.rank}</span>
+                              <span className="text-gray-700">{opt.text}</span>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-2 mb-2">
                   <input
                     type="text"
@@ -277,13 +338,23 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
                     Send
                   </button>
                 </div>
-                <button
-                  onClick={endAndScore}
-                  disabled={messages.filter((m) => m.role === 'staff').length === 0}
-                  className="w-full text-sm text-crimson font-medium py-1 disabled:opacity-30"
-                >
-                  End & Score
-                </button>
+
+                <div className="flex gap-2 mb-2">
+                  <button
+                    onClick={getAnswerOptions}
+                    disabled={optionsLoading || messages.length === 0}
+                    className="flex-1 text-sm px-3 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 disabled:opacity-50"
+                  >
+                    {optionsLoading ? 'Loading...' : '💡 Stuck? See options'}
+                  </button>
+                  <button
+                    onClick={endAndScore}
+                    disabled={messages.filter((m) => m.role === 'staff').length === 0}
+                    className="flex-1 text-sm text-crimson font-medium py-2 disabled:opacity-30"
+                  >
+                    End & Score
+                  </button>
+                </div>
               </>
             )}
           </div>

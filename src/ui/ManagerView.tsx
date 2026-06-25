@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { loadProfiles, deleteProfile } from '../state/profiles';
+import { loadProfiles, deleteProfile, loginOrCreateProfile } from '../state/profiles';
 import { getAllScenarios } from '../content/registry';
+import { ImportStaffDialog } from './ImportStaffDialog';
 
 const DEFAULT_MANAGER_PIN = '0000';
 
@@ -23,6 +24,9 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(loadProfiles());
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<string | null>(null);
+  const [editPin, setEditPin] = useState('');
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +47,24 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const handleViewStaffDetail = (firstName: string, lastName: string) => {
     setSelectedStaff(`${firstName}|${lastName}`);
     setViewMode('staff-detail');
+  };
+
+  const handleEditPin = (firstName: string, lastName: string) => {
+    const staff = profiles.find((p) => p.firstName === firstName && p.lastName === lastName);
+    if (staff) {
+      setEditingStaff(`${firstName}|${lastName}`);
+      setEditPin(staff.pin);
+    }
+  };
+
+  const handleSavePin = (firstName: string, lastName: string) => {
+    if (editPin.length !== 4) return;
+    const staff = profiles.find((p) => p.firstName === firstName && p.lastName === lastName);
+    if (staff) {
+      loginOrCreateProfile(firstName, lastName, editPin, staff.position, staff.department);
+      setProfiles(loadProfiles());
+      setEditingStaff(null);
+    }
   };
 
   if (!authenticated) {
@@ -138,10 +160,46 @@ export function ManagerView({ onBack }: ManagerViewProps) {
           )}
         </div>
 
-        <div className="mt-6 pt-6 border-t">
+        <div className="mt-6 pt-6 border-t space-y-2">
+          <div className="bg-gray-50 p-4 rounded">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Change PIN</h4>
+            {editingStaff === `${staff.firstName}|${staff.lastName}` ? (
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={editPin}
+                  onChange={(e) => setEditPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  maxLength={4}
+                  placeholder="New PIN"
+                  className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono text-center"
+                />
+                <button
+                  onClick={() => handleSavePin(staff.firstName, staff.lastName)}
+                  disabled={editPin.length !== 4}
+                  className="px-4 py-2 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditingStaff(null)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleEditPin(staff.firstName, staff.lastName)}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Click to change PIN
+              </button>
+            )}
+          </div>
+
           <button
             onClick={() => handleDeleteProfile(staff.firstName, staff.lastName)}
-            className="text-sm text-red-600 hover:text-red-700"
+            className="w-full text-sm text-red-600 hover:text-red-700 py-2"
           >
             Delete Profile
           </button>
@@ -162,13 +220,28 @@ export function ManagerView({ onBack }: ManagerViewProps) {
 
   return (
     <div className="px-4 py-4 max-w-4xl mx-auto">
-      <button onClick={onBack} className="text-sm text-crimson underline mb-4">
-        &larr; Back
-      </button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={onBack} className="text-sm text-crimson underline">
+          &larr; Back
+        </button>
+        <button
+          onClick={() => setShowImportDialog(true)}
+          className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          📥 Import CSV
+        </button>
+      </div>
       <h2 className="text-2xl font-bold text-crimson-dark mb-1">Manager Dashboard</h2>
       <p className="text-sm text-gray-600 mb-6">
         {profiles.length} staff member{profiles.length !== 1 ? 's' : ''} · {totalAttempts} total attempt{totalAttempts !== 1 ? 's' : ''}
       </p>
+
+      {showImportDialog && (
+        <ImportStaffDialog
+          onClose={() => setShowImportDialog(false)}
+          onSuccess={() => setProfiles(loadProfiles())}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
