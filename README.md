@@ -2,9 +2,9 @@
 
 A web app for hotel staff to practise real guest-facing situations by speaking to an AI "guest" and getting instantly scored on their performance.
 
-## Status: Phase 1 Scaffold Complete
+## Status: Phase 1 Complete
 
-The full architecture and UI for Phase 1 are built and functional. **Known issue:** the login form doesn't navigate (form submission handler isn't firing). This is a minor client-side React wiring bug, not an architectural issue. Once fixed, the downstream flow (practice areas → scenarios → role-play → scoring) is ready to test end-to-end.
+The full architecture and UI for Phase 1 are built and fully functional. Login, practice areas, scenarios, and the role-play → scoring flow are all working end-to-end.
 
 ## Quick Start
 
@@ -62,30 +62,19 @@ The full architecture and UI for Phase 1 are built and functional. **Known issue
 - **State management** with PIN-auth profiles, time/score tracking, localStorage persistence
 - **Tailwind + brand colours** (crimson #960404, teal #039594)
 
-### ⚠️ Known Issue
-**Login form doesn't navigate.** The Sign In button doesn't trigger the `handleLogin` React handler. This is a form submission wiring bug (React event binding issue), not a logic error. The rest of the app is ready; once this is fixed, the flow is:
-1. Login with any name + PIN
-2. Choose a practice area
+### 🚀 Full User Flow
+1. Login with any name + 4-digit PIN
+2. Choose a practice area (Front Desk ready)
 3. Pick a scenario
-4. Converse (text input for now; voice in Phase 2)
-5. End & Score to see results
+4. Converse with the AI guest (text input for now; voice in Phase 2)
+5. Click "End & Score" to see results with dimension ratings and coaching
 
-### 🔄 Workaround (for testing)
-Manually create a profile in localStorage and reload:
-```javascript
-localStorage.setItem('hotelready.profiles', JSON.stringify([{
-  firstName: "Demo",
-  lastName: "User",
-  pin: "1234",
-  position: "Receptionist",
-  department: "FO",
-  attempts: [],
-  bestByScenario: {},
-  bestTimeByScenario: {}
-}]));
-window.location.reload();
+### 🧪 Demo Mode
+For quick testing without typing, use the demo query parameter:
 ```
-Then you can navigate to practice-area selector, scenarios, and test the role-play loop.
+http://localhost:5173/?demo
+```
+This auto-fills the login form with test credentials (Demo/User, PIN 1234, Receptionist). Click "Sign In" to proceed straight to the practice-area selector.
 
 ## File Structure
 
@@ -149,7 +138,6 @@ Edit `src/ui/Header.tsx`:
 
 ## Next Steps (Phase 2+)
 
-- [ ] Fix login form submission handler
 - [ ] Add speech-to-text (browser Web Speech API)
 - [ ] Add text-to-speech (ElevenLabs or fallback to browser `speechSynthesis`)
 - [ ] Implement "Stuck? See options" card UI
@@ -171,11 +159,6 @@ kill -9 <PID>
 - Check it at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
 - Verify the key in `.env` (no extra spaces)
 - Check that your account has API credits
-
-**Form not submitting:**
-- This is the known Phase 1 bug
-- Use the localStorage workaround (see above) to test the rest of the flow
-- Debug the React event binding in `WhoAreYou.tsx` + `App.tsx`
 
 ---
 
