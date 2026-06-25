@@ -72,11 +72,20 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         const voiceList = Object.entries(data).map(([, value]: any) => ({
           id: value.id,
           name: value.name,
+          description: value.description,
           value: value.id,
         }));
         setVoices(voiceList);
       })
-      .catch(() => console.log('Could not load voices, using browser TTS'));
+      .catch(() => {
+        // Fallback to default voices if API fails
+        const defaultVoices = [
+          { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella (Professional)', description: 'Warm and professional', value: 'EXAVITQu4vr4xnSDxMaL' },
+          { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli (Friendly)', description: 'Friendly and approachable', value: 'MF3mGyEYCl7XYWbV9V6O' },
+          { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Chris (Assertive)', description: 'Confident and authoritative', value: 'TxGEqnHWrfWFTfGW9XjX' },
+        ];
+        setVoices(defaultVoices);
+      });
   }, []);
 
   function startScenario() {
@@ -328,21 +337,28 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         {!started && (
           <div className="mt-3 space-y-2">
             <label className="block">
-              <div className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+              <div className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
                 🎙️ Guest Voice {voices.length > 0 && '(Premium TTS)'}
               </div>
               {voices.length > 0 ? (
-                <select
-                  value={selectedVoice}
-                  onChange={(e) => setSelectedVoice(e.target.value)}
-                  className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-crimson"
-                >
-                  {voices.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-                </select>
+                <div className="space-y-2">
+                  <select
+                    value={selectedVoice}
+                    onChange={(e) => setSelectedVoice(e.target.value)}
+                    className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-crimson"
+                  >
+                    {voices.map((v) => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  </select>
+                  {voices.find((v) => v.id === selectedVoice)?.description && (
+                    <div className="text-xs text-gray-600 italic">
+                      {voices.find((v) => v.id === selectedVoice)?.description}
+                    </div>
+                  )}
+                </div>
               ) : (
-                <div className="text-xs text-gray-500 italic">Using browser voice</div>
+                <div className="text-xs text-gray-500 italic">Loading voices...</div>
               )}
             </label>
             {voices.length > 0 && (
