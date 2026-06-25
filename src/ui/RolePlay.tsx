@@ -19,6 +19,7 @@ type Voice = {
   id: string;
   name: string;
   value: string;
+  description?: string;
 };
 
 export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
