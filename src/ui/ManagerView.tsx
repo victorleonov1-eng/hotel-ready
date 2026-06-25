@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { loadProfiles, deleteProfile, loginOrCreateProfile } from '../state/profiles';
 import { getAllScenarios } from '../content/registry';
 import { ImportStaffDialog } from './ImportStaffDialog';
+import { AnalyticsDashboard } from './AnalyticsDashboard';
 
 const DEFAULT_MANAGER_PIN = '0000';
 
@@ -9,7 +10,7 @@ type ManagerViewProps = {
   onBack: () => void;
 };
 
-type ViewMode = 'dashboard' | 'staff-detail';
+type ViewMode = 'dashboard' | 'staff-detail' | 'analytics';
 
 export function ManagerView({ onBack }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
@@ -101,6 +102,23 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   }
 
   const scenarios = getAllScenarios();
+
+  if (viewMode === 'analytics') {
+    return (
+      <div className="px-4 py-4 max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setViewMode('dashboard')}
+            className="text-sm text-crimson underline"
+          >
+            &larr; Back to Dashboard
+          </button>
+        </div>
+        <h2 className="text-2xl font-bold text-crimson-dark mb-6">Analytics & Insights</h2>
+        <AnalyticsDashboard />
+      </div>
+    );
+  }
 
   if (viewMode === 'staff-detail' && selectedStaff) {
     const [firstName, lastName] = selectedStaff.split('|');
@@ -224,12 +242,20 @@ export function ManagerView({ onBack }: ManagerViewProps) {
         <button onClick={onBack} className="text-sm text-crimson underline">
           &larr; Back
         </button>
-        <button
-          onClick={() => setShowImportDialog(true)}
-          className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          📥 Import CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('analytics')}
+            className="text-sm px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            📊 Analytics
+          </button>
+          <button
+            onClick={() => setShowImportDialog(true)}
+            className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            📥 Import CSV
+          </button>
+        </div>
       </div>
       <h2 className="text-2xl font-bold text-crimson-dark mb-1">Manager Dashboard</h2>
       <p className="text-sm text-gray-600 mb-6">

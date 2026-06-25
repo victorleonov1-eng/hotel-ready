@@ -1,0 +1,105 @@
+{
+  "id": "concierge",
+  "department": "Concierge",
+  "scenarios": [
+    {
+      "id": "cc-01",
+      "title": "Guest requests last-minute dinner reservation at fully booked restaurant",
+      "situation": "A guest calls asking for a dinner reservation at a prestigious local restaurant they've heard about. It's 6pm and they want to eat at 8pm. The restaurant fully booked for weeks.",
+      "guestPersona": "Affluent guest who's used to getting what they want. They believe concierge should have connections. Willing to pay for a solution but annoyed at the suggestion they might not get it.",
+      "guestOpeningLine": "I'd like a table for two at Chez Laurent tonight at 8pm. I've heard it's incredible. Can you make that happen?",
+      "difficultyNote": "If concierge proactively suggests 2-3 equally excellent alternatives and offers to call them personally while the guest waits, guest is impressed. If concierge says 'it's fully booked, sorry', guest is disappointed. If concierge tries to get the booking anyway and confirms it worked, guest is delighted.",
+      "skills": ["resourcefulness", "local knowledge", "relationship leverage"],
+      "businessOutcome": "Guest satisfaction, upsell dining packages",
+      "successCriteria": "Acknowledges the request seriously, immediately offers high-quality alternatives, calls restaurants personally to secure bookings, confirms the best option with the guest, and perhaps offers a courtesy upgrade or discount to sweeten the deal."
+    },
+    {
+      "id": "cc-02",
+      "title": "Guest has special occasion but didn't plan ahead for celebration",
+      "situation": "A guest mentions at check-in (or the next morning) that it's their anniversary, but they didn't pre-arrange anything. Concierge has a chance to create a memorable experience.",
+      "guestPersona": "Thoughtful spouse who realises they forgot, now panicked and wanting to salvage the evening. They're willing to spend money but embarrassed they didn't plan.",
+      "guestOpeningLine": "Um, my partner just reminded me it's our anniversary... I kind of forgot to plan anything. Is there anything you could help with?",
+      "difficultyNote": "If concierge responds with enthusiasm ('absolutely, I love saving the day!'), offers 3 romantic options (dinner, activity, in-room setup), and executes one quickly, guest is eternally grateful. If dismissive or slow, guest's anxiety increases.",
+      "skills": ["empathy", "creativity", "execution speed"],
+      "businessOutcome": "Guest satisfaction, upsell experiences",
+      "successCriteria": "Responds with genuine enthusiasm, does NOT make the guest feel bad, offers multiple romantic options (restaurant, activity, in-room setup), confirms the best option within 30 minutes, and delivers with a flourish."
+    },
+    {
+      "id": "cc-03",
+      "title": "Guest needs urgent business supplies or services in unfamiliar city",
+      "situation": "A guest has an important client meeting tomorrow but left their laptop charger at home, needs document printing tonight, and wants business-appropriate suit tailoring done by morning.",
+      "guestPersona": "Stressed business traveller on a tight deadline. They're used to problem-solving but don't know the city. They're grateful for help but impatient.",
+      "guestOpeningLine": "I have a client meeting tomorrow morning and I'm in a bit of a bind. I need a laptop charger, some documents printed, and my suit pressed. I don't suppose you can help?",
+      "difficultyNote": "If concierge immediately says 'I can help with all of that' and executes within 1-2 hours, guest feels looked after. If there's hesitation or vagueness, guest panics. If concierge follows up to confirm everything arrived, guest is impressed.",
+      "skills": ["problem-solving", "vendor relationships", "follow-through"],
+      "businessOutcome": "Guest satisfaction, loyalty building",
+      "successCriteria": "Responds with confidence, secures charger from hotel stock or local store immediately, arranges printing to hotel business centre, coordinates suit pressing with housekeeping, confirms everything delivered, and checks back to ensure guest is ready for meeting."
+    },
+    {
+      "id": "cc-04",
+      "title": "Recommend activities aligned with guest interests",
+      "situation": "A guest asks what there is to do in the city. They're vague about interests, or they mention something obscure. Concierge needs to ask questions and offer tailored suggestions.",
+      "guestPersona": "Curious traveller who wants authentic experiences, not generic tourist attractions. They're open to suggestions but want things that fit their personality.",
+      "guestOpeningLine": "What's there to do around here? I'm here for three days and want to make the most of it.",
+      "difficultyNote": "If concierge asks probing questions ('Are you outdoorsy? Art interested? Foodie? Nightlife?'), then offers 3-4 tailored options with personal anecdotes, guest feels heard. If concierge just lists the top 10 attractions, guest feels generic advice.",
+      "skills": ["listening", "local knowledge", "curation"],
+      "businessOutcome": "Guest satisfaction, memorable experiences",
+      "successCriteria": "Asks clarifying questions to understand interests, offers 3 tailored recommendations with personal context ('This gallery is perfect if you like contemporary art'), provides logistical help (maps, reservations, transport), and checks back to hear how it went."
+    },
+    {
+      "id": "cc-05",
+      "title": "Handle difficult guest request that's outside hotel policy",
+      "situation": "A guest requests something the hotel doesn't normally allow (e.g., bringing outside food to room, keeping a pet temporarily, late checkout without notice). Concierge needs to find a middle ground.",
+      "guestPersona": "Reasonable guest who doesn't know the rules and isn't trying to be difficult. They'll accept a compromise if explained politely.",
+      "guestOpeningLine": "Is it possible to have a late checkout tomorrow? I know it's short notice, but I have an evening flight.",
+      "difficultyNote": "If concierge explains the standard policy and then offers a creative solution (e.g., 'standard checkout is 11am, but I can arrange luggage storage until your flight'), guest feels respected. If concierge says no flatly, guest is annoyed.",
+      "skills": ["diplomacy", "policy knowledge", "creativity"],
+      "businessOutcome": "Guest satisfaction, problem-solving",
+      "successCriteria": "Acknowledges the request, explains the standard policy without sounding robotic, offers a compromise that works for both guest and hotel, and confirms the arrangement clearly."
+    },
+    {
+      "id": "cc-06",
+      "title": "Give directions or transit advice to arriving guest",
+      "situation": "A guest calls asking for directions from the airport to the hotel, or the best way to get to a specific destination. They're unfamiliar with the city and public transport.",
+      "guestPersona": "Anxious traveller who doesn't want to get lost or waste money. They appreciate clear, confident guidance and reassurance.",
+      "guestOpeningLine": "I'm at the airport and trying to figure out how to get to the hotel. What's the best way?",
+      "difficultyNote": "If concierge gives 2-3 clear options with pros/cons (taxi cost/time, public transport cost/time, hotel shuttle), guest feels empowered. If vague ('taxi or train, whatever works'), guest feels abandoned. If concierge arranges a pickup, guest is delighted.",
+      "skills": ["local knowledge", "clear communication", "decision support"],
+      "businessOutcome": "Guest satisfaction, positive arrival experience",
+      "successCriteria": "Provides multiple transport options with clear cost and time estimates, recommends the best option for their situation, gives detailed directions or arranges pickup, and ensures they know how to contact the hotel if lost."
+    },
+    {
+      "id": "cc-07",
+      "title": "Recover a guest who had a poor experience with another department",
+      "situation": "A guest had a bad experience (slow room service, unhelpful front desk, noisy room, etc.) and mentions it to concierge. Concierge has a chance to salvage their stay and perception of the hotel.",
+      "guestPersona": "Disappointed guest who was willing to enjoy the hotel but had a hiccup. They're not angry, just let down. They're unsure if things will get better.",
+      "guestOpeningLine": "I ordered room service an hour ago and still haven't eaten. This has been disappointing so far.",
+      "difficultyNote": "If concierge apologises sincerely, immediately investigates the room service issue, gets the food expedited, and offers a small gesture (comp dessert, discount on dining), guest feels the hotel cares. If concierge says 'sorry, kitchen is busy', guest's frustration deepens.",
+      "skills": ["empathy", "accountability", "cross-department coordination"],
+      "businessOutcome": "Service recovery, retention",
+      "successCriteria": "Apologises sincerely without blame-shifting, immediately escalates to fix the issue, offers a small gesture of goodwill, checks back to ensure the experience improved, and documents the issue to prevent recurrence."
+    },
+    {
+      "id": "cc-08",
+      "title": "Coordinate a group activity or tour for multiple guests",
+      "situation": "A group of guests asks if concierge can arrange a guided city tour for their group tomorrow. They have 12 people, mixed mobility levels, budget-conscious but willing to pay for quality.",
+      "guestPersona": "Group organiser who wants to book efficiently and ensure everyone enjoys it. They're slightly stressed about logistics but trust the concierge to deliver.",
+      "guestOpeningLine": "We're a group of 12 and we'd love to do a city tour tomorrow. Can you recommend something and book it for us?",
+      "difficultyNote": "If concierge asks about budget, mobility, interests, then recommends a tour company that fits, arranges pickup/dropoff, and confirms all logistics, group is impressed. If vague recommendations or poor coordination, group feels like they're doing the work.",
+      "skills": ["group management", "vendor coordination", "logistics"],
+      "businessOutcome": "Guest satisfaction, group upsell",
+      "successCriteria": "Asks about budget, accessibility, and interests before recommending, books a tour that fits the criteria, arranges transport, provides clear instructions and itinerary to the group, and checks back to ensure everyone enjoyed it."
+    },
+    {
+      "id": "cc-09",
+      "title": "Handle complaint about a restaurant or service concierge recommended",
+      "situation": "A guest goes to a restaurant the concierge recommended. The experience is disappointing (long wait, poor service, food not as described). They return and express frustration to the concierge.",
+      "guestPersona": "Disappointed guest who trusted the concierge's recommendation and feels let down. They're not angry at the concierge but want acknowledgment and a remedy.",
+      "guestOpeningLine": "That restaurant you recommended was really disappointing. We waited 30 minutes and the service was slow. I was expecting better.",
+      "difficultyNote": "If concierge apologises for the recommendation, listens to the details, and offers to arrange a meal at a different restaurant on the hotel (or partial comp), guest feels the hotel stands behind its recommendations. If defensive, guest feels dismissed.",
+      "skills": ["accountability", "empathy", "relationship management"],
+      "businessOutcome": "Service recovery, vendor management",
+      "successCriteria": "Apologises sincerely for the poor experience, listens fully to what went wrong, takes responsibility for the recommendation, offers a remedy (different restaurant, discount, comp meal), and follows up to ensure satisfaction."
+    }
+  ]
+}
