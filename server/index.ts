@@ -1,9 +1,10 @@
 import express from 'express';
 import path from 'path';
-import { chatWithGuest, scoreConversation, getAnswerOptions } from './anthropic';
-import { guestSystemPrompt, scorerSystemPrompt, answerOptionsPrompt } from './prompts';
-import { textToSpeechElevenLabs, AVAILABLE_VOICES } from './elevenlabs';
-import type { Scenario, ScoreResult } from '../src/content/types';
+import { chatWithGuest, scoreConversation, getAnswerOptions } from './anthropic.js';
+import { guestSystemPrompt, scorerSystemPrompt, answerOptionsPrompt } from './prompts.js';
+import { textToSpeechElevenLabs, AVAILABLE_VOICES } from './elevenlabs.js';
+import { generateReportPDF } from './pdfreport.js';
+import type { Scenario, ScoreResult, UserProfile } from '../src/content/types.js';
 
 const app = express();
 app.use(express.json());
@@ -93,6 +94,28 @@ app.post('/api/tts', async (req, res) => {
 
 app.get('/api/voices', (_req, res) => {
   res.json(AVAILABLE_VOICES);
+});
+
+app.post('/api/export-report', async (req, res) => {
+  try {
+    const { profiles, scenarios } = req.body as {
+      profiles: UserProfile[];
+      scenarios: Scenario[];
+    };
+
+    if (!profiles || !scenarios) {
+      return res.status(400).json({ error: 'Profiles and scenarios are required' });
+    }
+
+    const pdfBuffer = await generateReportPDF(profiles, scenarios);
+
+    res.set('Content-Type', 'application/pdf');
+    res.set('Content-Disposition', `attachment; filename="team-report-${new Date().toISOString().split('T')[0]}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (err: any) {
+    console.error('export-report error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const distPath = path.join(import.meta.dirname, '..', 'dist');

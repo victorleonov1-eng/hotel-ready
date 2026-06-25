@@ -18,16 +18,6 @@ export const AVAILABLE_VOICES = {
     name: 'Chris (Assertive)',
     description: 'Confident and authoritative',
   },
-  warm: {
-    id: 'IKne3meq5OH5OfVMjIbN', // Sarah - warm, empathetic
-    name: 'Sarah (Warm)',
-    description: 'Warm and empathetic',
-  },
-  calm: {
-    id: 'bIHbv24MWmeRgasZak2b', // Charlie - calm, measured
-    name: 'Charlie (Calm)',
-    description: 'Calm and measured',
-  },
 };
 
 export type VoiceStyle = keyof typeof AVAILABLE_VOICES;

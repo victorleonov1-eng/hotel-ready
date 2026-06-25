@@ -28,6 +28,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingStaff, setEditingStaff] = useState<string | null>(null);
   const [editPin, setEditPin] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +66,34 @@ export function ManagerView({ onBack }: ManagerViewProps) {
       loginOrCreateProfile(firstName, lastName, editPin, staff.position, staff.department);
       setProfiles(loadProfiles());
       setEditingStaff(null);
+    }
+  };
+
+  const handleExportReport = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch('/api/export-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profiles, scenarios }),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate report');
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `team-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export report');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -248,6 +277,13 @@ export function ManagerView({ onBack }: ManagerViewProps) {
             className="text-sm px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
             📊 Analytics
+          </button>
+          <button
+            onClick={handleExportReport}
+            disabled={exporting || profiles.length === 0}
+            className="text-sm px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {exporting ? '⏳ Exporting...' : '📄 Export PDF'}
           </button>
           <button
             onClick={() => setShowImportDialog(true)}

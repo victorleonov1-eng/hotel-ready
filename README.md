@@ -1,8 +1,8 @@
-# HOTEL Ready — Phase 1 MVP
+# HOTEL Ready — Enterprise Training Platform
 
 A web app for hotel staff to practise real guest-facing situations by speaking to an AI "guest" and getting instantly scored on their performance.
 
-## Status: Phase 3 Complete
+## Status: Phase 4.1 Complete (PDF Reports)
 
 **Phase 1** (core MVP): Login, role-play, scoring, and manager dashboard fully functional.
 
@@ -63,17 +63,28 @@ The app is fully production-ready for hotel staff training at scale. Teams can p
 - **Score card** showing overall 0–100 score, 5 dimension bars, coaching points, verdict, and timing
 - **Manager dashboard** (PIN-gated, view team stats and scenario performance)
 - **Type-safe models** (GuestTurn with emotion, AnswerOptions, timing)
-- **Backend APIs:** `/api/guest-turn`, `/api/score`, `/api/answer-options`, `/api/tts`, `/api/voices`
+- **Backend APIs:** `/api/guest-turn`, `/api/score`, `/api/answer-options`, `/api/tts`, `/api/voices`, `/api/export-report`
 - **State management** with PIN-auth profiles, time/score tracking, localStorage persistence
 - **Tailwind + brand colours** (crimson #960404, teal #039594)
 
 **Phase 3.5: Premium text-to-speech (optional upgrade)**
 - **ElevenLabs integration:**
-  - 5 professional voices with distinct characteristics (Bella, Elli, Chris, Sarah, Charlie)
+  - 3 professional voices with distinct characteristics (Bella, Elli, Chris)
   - Emotion-aware voice parameter adjustment per guest state
   - Voice selector dropdown in role-play screen
   - Graceful fallback to browser speechSynthesis if API key not configured
   - User voice preference saved to localStorage
+
+**Phase 4.1: Manager Report Export**
+- **PDF report generation:**
+  - Download team performance reports as PDF
+  - Includes team summary (staff count, total attempts, average score)
+  - Top performers leaderboard (ranked by average score)
+  - Needs improvement list (staff below 65 average)
+  - Scenario difficulty analysis with performance bars
+  - Individual staff performance details
+  - Professional formatting with HOTEL Ready branding (crimson/teal)
+  - Single-click export from manager dashboard
 
 **Phase 2: Content and speech**
 - **3 Scenario content packs (27 scenarios):**
@@ -132,9 +143,10 @@ This auto-fills the login form with test credentials (Demo/User, PIN 1234, Recep
 ```
 hotel-ready/
   server/
-    index.ts            # Express: /api/guest-turn, /api/score, /api/answer-options
+    index.ts            # Express: /api/guest-turn, /api/score, /api/answer-options, /api/export-report
     anthropic.ts        # Anthropic SDK wrapper
     prompts.ts          # System prompts for guest & scorer
+    pdfreport.ts        # PDF report generation (pdfkit)
   src/
     App.tsx             # Main app router
     engine/             # [Phase 2: scenario runner logic]
@@ -187,17 +199,19 @@ Edit `src/ui/Header.tsx`:
 - **Manager PIN:** Defaults to `0000`, changeable only from inside the dashboard
 - **API key security:** Never exposed to browser; all Claude calls go through `/api/*` proxy
 
-## Next Steps (Phase 4+)
+## Next Steps (Phase 4.2+)
 
-- [ ] Additional scenario packs: Front Office, Accounting, Technical Support, Spa/Wellness
-- [ ] Export/print manager reports (PDF generation with team stats and recommendations)
-- [ ] Custom voice selection: ElevenLabs or similar for premium TTS
-- [ ] Session recording/playback for coaching review and trainer use
+**Phase 4.1 ✅ Complete**
+- [x] PDF manager report export with team summary, top performers, needs improvement, scenario analysis
+
+**Upcoming Phases**
+- [ ] Phase 4.2: Session recording/playback for coaching review
+- [ ] Phase 4.3: Additional scenario packs (Accounting, Technical Support, Spa/Wellness)
+- [ ] Phase 5: Certifications & badges for skill mastery
+- [ ] Phase 6: Backend database migration (from localStorage)
+- [ ] Phase 7: Multi-property support with centralized analytics
 - [ ] Mobile app (React Native) for on-the-go practice
-- [ ] Backend database migration (currently localStorage only)
-- [ ] Multi-property support (different hotel locations, centralized analytics)
-- [ ] Custom scenario creation tool for hotels to add proprietary scenarios
-- [ ] Certifications and badges for skill mastery
+- [ ] Custom scenario creation tool for hotels
 - [ ] Integration with hotel PMS for automatic staff roster sync
 - [ ] LMS integration (SCORM, xAPI) for corporate training programs
 - [ ] Multilingual scenario packs
