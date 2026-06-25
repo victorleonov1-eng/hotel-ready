@@ -2,16 +2,20 @@
 
 A web app for hotel staff to practise real guest-facing situations by speaking to an AI "guest" and getting instantly scored on their performance.
 
-## Status: Phase 2 Complete
+## Status: Phase 3 Complete
 
-**Phase 1** (core MVP) is fully functional: login, role-play, scoring, and manager dashboard.
+**Phase 1** (core MVP): Login, role-play, scoring, and manager dashboard fully functional.
 
-**Phase 2** adds:
-- 3 department scenario packs with 27 total scenarios (Front Desk, F&B, Housekeeping)
-- Emotion-based voice delivery with rate/pitch adjustment based on guest mood
-- Enhanced manager dashboard with staff detail views and delete functionality
+**Phase 2**: 3 department packs (27 scenarios), emotion-based voice delivery, enhanced manager dashboard.
 
-The app is production-ready for hotel staff training. Teams can practice real guest-facing conversations with an AI that responds dynamically based on their approach, and managers can track team performance at a glance.
+**Phase 3** adds:
+- **36 total scenarios** across 4 department packs (added Concierge)
+- **"Stuck? See options"** UI with AI-suggested responses ranked by effectiveness
+- **CSV bulk staff import** for team setup and management
+- **Profile editing** (change staff PIN from manager dashboard)
+- **Analytics dashboard** with team metrics, performance trends, scenario difficulty analysis
+
+The app is fully production-ready for hotel staff training at scale. Teams can practice across 4 departments, get AI coaching during scenarios, and managers have complete visibility into team performance with actionable insights.
 
 ## Quick Start
 
@@ -63,19 +67,42 @@ The app is production-ready for hotel staff training. Teams can practice real gu
 - **Tailwind + brand colours** (crimson #960404, teal #039594)
 
 **Phase 2: Content and speech**
-- **Scenario content packs:**
-  - **Front Desk / Reception** — 9 scenarios (check-in issues, upselling, billing, late checkout)
-  - **Food & Beverage Service** — 9 scenarios (allergies, wine pairings, complaints, upselling, ambiance)
-  - **Housekeeping / Room Service** — 9 scenarios (room cleaning, maintenance, delays, laundry, noise, comfort)
+- **3 Scenario content packs (27 scenarios):**
+  - **Front Desk / Reception** — check-in issues, upselling, billing, late checkout
+  - **Food & Beverage Service** — allergies, wine pairings, complaints, upselling, ambiance
+  - **Housekeeping / Room Service** — room cleaning, maintenance, delays, laundry, noise, comfort
 - **Emotion-based voice delivery:**
   - Speech rate and pitch adjusted per guest emotion (angry→slow, satisfied→fast)
   - Emotion indicators (emoji badges) in conversation bubbles
-  - Integration with Web Speech API for natural guest voice
 - **Enhanced manager dashboard:**
   - Click staff members to view detailed performance metrics
   - Per-scenario statistics (attempts, best score, average)
   - Delete profile functionality with confirmation
-  - Improved layout with scenario and team member panels
+
+**Phase 3: Advanced features and analytics**
+- **36 Total scenarios across 4 department packs:**
+  - Added **Concierge** — 9 scenarios (reservations, special occasions, business services, recovery)
+- **"Stuck? See options" feature:**
+  - AI-powered response suggestions based on conversation context
+  - Ranked suggestions (1-5 stars) showing effectiveness
+  - Click to insert suggestion into input field
+  - Tracks hint usage for coaching purposes
+- **CSV bulk staff import:**
+  - Upload CSV file with: firstName, lastName, pin, position, department
+  - Batch create multiple staff profiles
+  - Validation and success/error reporting
+  - Accessible from manager dashboard
+- **Profile management:**
+  - Change staff PIN from manager dashboard
+  - Delete profiles with confirmation
+  - Edit options in staff detail view
+- **Analytics dashboard:**
+  - Team performance metrics (total attempts, average score, staff count)
+  - Top performers leaderboard with improvement tracking
+  - "Needs improvement" list (staff below 65 avg score)
+  - Scenario difficulty analysis with performance bars
+  - Per-staff metrics: attempts, best score, average, improvement rate
+  - Accessible via "Analytics" button on manager dashboard
 
 ### 🚀 Full User Flow
 1. Login with any name + 4-digit PIN
@@ -151,17 +178,20 @@ Edit `src/ui/Header.tsx`:
 - **Manager PIN:** Defaults to `0000`, changeable only from inside the dashboard
 - **API key security:** Never exposed to browser; all Claude calls go through `/api/*` proxy
 
-## Next Steps (Phase 3+)
+## Next Steps (Phase 4+)
 
-- [ ] Implement "Stuck? See options" UI (use `/api/answer-options` endpoint)
-- [ ] Add more scenario packs (Concierge, Front Office, Accounting, etc.)
-- [ ] Export/print manager reports (PDF generation)
-- [ ] Edit profile functionality (change PIN, position, department)
-- [ ] Bulk staff import (CSV upload for team setup)
-- [ ] Mobile layout refinements
-- [ ] Custom voice selection for ElevenLabs or similar TTS service
-- [ ] Session recording/playback for coaching review
-- [ ] Analytics dashboard (aggregate team performance, trending scenarios)
+- [ ] Additional scenario packs: Front Office, Accounting, Technical Support, Spa/Wellness
+- [ ] Export/print manager reports (PDF generation with team stats and recommendations)
+- [ ] Custom voice selection: ElevenLabs or similar for premium TTS
+- [ ] Session recording/playback for coaching review and trainer use
+- [ ] Mobile app (React Native) for on-the-go practice
+- [ ] Backend database migration (currently localStorage only)
+- [ ] Multi-property support (different hotel locations, centralized analytics)
+- [ ] Custom scenario creation tool for hotels to add proprietary scenarios
+- [ ] Certifications and badges for skill mastery
+- [ ] Integration with hotel PMS for automatic staff roster sync
+- [ ] LMS integration (SCORM, xAPI) for corporate training programs
+- [ ] Multilingual scenario packs
 
 ## Troubleshooting
 
