@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
 const HOTEL_NAME = 'Hotel Name';
-const HOTEL_LOGO = null; // Slot for logo — pass as prop if needed
 
 type HeaderProps = {
   onMuteToggle?: (muted: boolean) => void;

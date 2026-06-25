@@ -99,7 +99,7 @@ export async function getAvailableVoices() {
 
     if (!response.ok) return null;
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
     return data.voices?.map((v: any) => ({
       id: v.voice_id,
       name: v.name,

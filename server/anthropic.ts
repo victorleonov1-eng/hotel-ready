@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
-import type { GuestTurn, AnswerOptions } from '../src/content/types';
+import type { GuestTurn, AnswerOptions } from '../src/content/types.js';
 
 dotenv.config();
 

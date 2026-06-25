@@ -1,4 +1,4 @@
-import type { Scenario, GuestTurn, AnswerOptions } from '../src/content/types';
+import type { Scenario } from '../src/content/types.js';
 
 export function guestSystemPrompt(scenario: Scenario): string {
   return `You are role-playing as a hotel guest. Stay in character at all times. Never break character, never coach the staff member, never mention that you are an AI.

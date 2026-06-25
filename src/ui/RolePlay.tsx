@@ -69,14 +69,14 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
     fetch('/api/voices')
       .then((res) => res.json())
       .then((data) => {
-        const voiceList = Object.entries(data).map(([key, value]: any) => ({
+        const voiceList = Object.entries(data).map(([, value]: any) => ({
           id: value.id,
           name: value.name,
           value: value.id,
         }));
         setVoices(voiceList);
       })
-      .catch((err) => console.log('Could not load voices, using browser TTS'));
+      .catch(() => console.log('Could not load voices, using browser TTS'));
   }, []);
 
   function startScenario() {

@@ -1,6 +1,5 @@
-import { loadProfiles, findProfile } from '../state/profiles';
+import { loadProfiles } from '../state/profiles';
 import { getAllScenarios } from '../content/registry';
-import type { UserProfile } from '../content/types';
 
 export function AnalyticsDashboard() {
   const profiles = loadProfiles();

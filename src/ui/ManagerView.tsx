@@ -18,13 +18,13 @@ type ViewMode = 'dashboard' | 'staff-detail' | 'analytics' | 'playback';
 export function ManagerView({ onBack }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const [managerPin, setManagerPin] = useState(() => {
+  const managerPin = (() => {
     try {
       return localStorage.getItem('hotelready.managerpin') || DEFAULT_MANAGER_PIN;
     } catch {
       return DEFAULT_MANAGER_PIN;
     }
-  });
+  })();
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(loadProfiles());
