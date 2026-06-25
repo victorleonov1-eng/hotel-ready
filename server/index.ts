@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import { chatWithGuest, scoreConversation, getAnswerOptions } from './anthropic.js';
 import { guestSystemPrompt, scorerSystemPrompt, answerOptionsPrompt } from './prompts.js';
@@ -7,6 +8,16 @@ import { generateReportPDF } from './pdfreport.js';
 import type { Scenario, ScoreResult, UserProfile } from '../src/content/types.js';
 
 const app = express();
+
+// Enable CORS for frontend
+app.use(cors({
+  origin: [
+    'https://hotel-ready.vercel.app',
+    'http://localhost:5174', // for local development
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.post('/api/guest-turn', async (req, res) => {
