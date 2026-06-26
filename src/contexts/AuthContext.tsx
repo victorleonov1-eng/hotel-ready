@@ -87,6 +87,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (authError) throw authError;
       if (!authData.user) throw new Error('User creation failed');
 
+      console.log('User created:', authData.user.id);
+
       // Create organization
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
@@ -97,12 +99,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        console.error('Organization creation error:', orgError);
+        throw orgError;
+      }
 
-      // Create user profile
+      console.log('Organization created:', orgData.id);
+
+      // Create user profile - use upsert to avoid RLS issues
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .insert({
+        .upsert({
           id: authData.user.id,
           email,
           full_name: fullName,
@@ -110,7 +117,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           organization_id: orgData.id,
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw profileError;
+      }
+
+      console.log('Profile created successfully');
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
