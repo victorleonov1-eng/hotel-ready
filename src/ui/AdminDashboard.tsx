@@ -219,59 +219,64 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
           <p className="text-gray-600">Manage your hotel properties and staff</p>
         </div>
 
-        {/* Dashboard PIN Section */}
+        {/* Dashboard PIN Section - Admin Only (No Expiry) */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+          <h3 className="font-bold text-gray-900 mb-2">Your Admin PIN</h3>
+          <p className="text-2xl font-mono font-bold text-blue-600">
+            {user?.user_metadata?.pin || '8739'}
+          </p>
+          <p className="text-xs text-gray-600 mt-2">No expiration for admin access</p>
+          <div className="flex gap-3 mt-4">
+            <button className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600">
+              🔄 Reset to 0000
+            </button>
+            <button className="bg-red-700 text-white px-4 py-2 rounded text-sm hover:bg-red-800">
+              ✏️ Set New PIN
+            </button>
+          </div>
+        </div>
+
+        {/* Organization PIN Expiry Section */}
         {selectedOrgId && organizations.find(o => o.id === selectedOrgId) && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900">Dashboard PIN</h3>
-                <p className="text-2xl font-mono font-bold text-blue-600 mt-2">
-                  {user?.user_metadata?.pin || '8739'}
-                </p>
-                {organizations.find(o => o.id === selectedOrgId)?.pin_expires_at && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600">PIN Expires:</p>
-                    <p className={`font-semibold mt-1 ${
-                      isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')
-                        ? 'text-red-600'
-                        : daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') <= 7
-                        ? 'text-orange-600'
-                        : 'text-green-600'
-                    }`}>
-                      {new Date(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '').toLocaleDateString()}
-                      {!isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
-                        <span className="text-sm ml-2">
-                          ({daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')} days)
-                        </span>
-                      )}
-                      {isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
-                        <span className="text-sm ml-2">⚠️ EXPIRED</span>
-                      )}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <h3 className="font-bold text-gray-900 mb-4">
+              PIN Expiry for {organizations.find(o => o.id === selectedOrgId)?.name}
+            </h3>
 
-            <div className="flex flex-wrap gap-3 mb-4">
-              <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                🔄 Reset PIN to 0000
-              </button>
-              <button className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800">
-                ✏️ Set New PIN
-              </button>
-              <button
-                onClick={() => setShowExpiryPicker(!showExpiryPicker)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                📅 Set Expiry Date
-              </button>
-            </div>
+            {organizations.find(o => o.id === selectedOrgId)?.pin_expires_at && (
+              <div className="mb-4 p-4 bg-gray-50 rounded">
+                <p className="text-sm text-gray-600">Current Expiration:</p>
+                <p className={`text-lg font-bold mt-1 ${
+                  isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')
+                    ? 'text-red-600'
+                    : daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') <= 7
+                    ? 'text-orange-600'
+                    : 'text-green-600'
+                }`}>
+                  {new Date(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '').toLocaleDateString()}
+                  {!isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
+                    <span className="text-sm ml-2">
+                      ({daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')} days left)
+                    </span>
+                  )}
+                  {isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
+                    <span className="text-sm ml-2">⚠️ EXPIRED</span>
+                  )}
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowExpiryPicker(!showExpiryPicker)}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              📅 {showExpiryPicker ? 'Cancel' : 'Change Expiry Date'}
+            </button>
 
             {showExpiryPicker && (
-              <div className="bg-gray-50 p-4 rounded border border-gray-200">
+              <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  PIN Expiration Date
+                  Set New PIN Expiration Date
                 </label>
                 <input
                   type="date"
@@ -285,7 +290,7 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                     disabled={!pinExpiryDate}
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
                   >
-                    Save
+                    Save Expiry
                   </button>
                   <button
                     onClick={() => {
@@ -326,6 +331,28 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                   <p className="text-sm text-gray-600 mt-1">
                     {properties.filter((p) => p.organization_id === org.id).length} locations
                   </p>
+                  {org.pin_expires_at && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <p className="text-xs text-gray-600">PIN Expires:</p>
+                      <p className={`text-sm font-semibold ${
+                        isPinExpired(org.pin_expires_at)
+                          ? 'text-red-600'
+                          : daysUntilExpiry(org.pin_expires_at) <= 7
+                          ? 'text-orange-600'
+                          : 'text-green-600'
+                      }`}>
+                        {new Date(org.pin_expires_at).toLocaleDateString()}
+                        {!isPinExpired(org.pin_expires_at) && (
+                          <span className="text-xs ml-1">
+                            ({daysUntilExpiry(org.pin_expires_at)}d left)
+                          </span>
+                        )}
+                        {isPinExpired(org.pin_expires_at) && (
+                          <span className="text-xs ml-1">⚠️ EXPIRED</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
