@@ -168,6 +168,25 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const deleteOrganization = async (orgId: string) => {
+    if (!confirm('Are you sure you want to delete this organization? This will remove all locations and staff assignments.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .delete()
+        .eq('id', orgId);
+
+      if (error) throw error;
+      if (selectedOrgId === orgId) {
+        setSelectedOrgId(null);
+      }
+      fetchOrganizationData();
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+    }
+  };
+
   const updatePinExpiry = async (newDate: string) => {
     if (!selectedOrgId) return;
 
@@ -316,23 +335,30 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                 {organizations.length}
               </span>
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {organizations.map((org) => (
                 <div
                   key={org.id}
-                  onClick={() => setSelectedOrgId(org.id)}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition ${
+                  className={`p-4 border-2 rounded-lg transition ${
                     selectedOrgId === org.id
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
+                      : 'border-gray-200'
                   }`}
                 >
-                  <h4 className="font-bold text-gray-900">{org.name}</h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {properties.filter((p) => p.organization_id === org.id).length} locations
-                  </p>
+                  <div className="flex justify-between items-start mb-3">
+                    <div
+                      onClick={() => setSelectedOrgId(org.id)}
+                      className="cursor-pointer flex-1"
+                    >
+                      <h4 className="font-bold text-gray-900">{org.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {properties.filter((p) => p.organization_id === org.id).length} locations
+                      </p>
+                    </div>
+                  </div>
+
                   {org.pin_expires_at && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="mb-3 p-3 bg-white rounded border border-gray-200">
                       <p className="text-xs text-gray-600">PIN Expires:</p>
                       <p className={`text-sm font-semibold ${
                         isPinExpired(org.pin_expires_at)
@@ -353,6 +379,25 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                       </p>
                     </div>
                   )}
+
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => {
+                        setSelectedOrgId(org.id);
+                        setShowExpiryPicker(true);
+                        setPinExpiryDate('');
+                      }}
+                      className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                    >
+                      📅 Set New PIN
+                    </button>
+                    <button
+                      onClick={() => deleteOrganization(org.id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
