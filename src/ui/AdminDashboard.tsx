@@ -154,7 +154,14 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
 
         {/* Dashboard PIN Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
-          <h3 className="font-bold text-gray-900 mb-4">Dashboard PIN</h3>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="font-bold text-gray-900">Dashboard PIN</h3>
+              <p className="text-2xl font-mono font-bold text-blue-600 mt-2">
+                {user?.user_metadata?.pin || '8739'}
+              </p>
+            </div>
+          </div>
           <div className="flex gap-3">
             <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
               🔄 Reset PIN to 0000
