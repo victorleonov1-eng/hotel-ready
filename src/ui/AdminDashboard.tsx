@@ -50,8 +50,6 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   }, [profile]);
 
   const fetchOrganizationData = async () => {
-    if (!profile?.organization_id) return;
-
     try {
       setLoading(true);
 
@@ -61,27 +59,48 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
         .select('*')
         .eq('admin_id', user?.id);
 
-      if (orgsError) throw orgsError;
+      if (orgsError) {
+        console.error('Error fetching organizations:', orgsError);
+        setOrganizations([]);
+        return;
+      }
+
       setOrganizations(orgs || []);
-      setSelectedOrgId(orgs?.[0]?.id || profile.organization_id);
+      const orgId = orgs?.[0]?.id || profile?.organization_id;
+      if (orgId) setSelectedOrgId(orgId);
+
+      if (!orgId) {
+        setLoading(false);
+        return;
+      }
 
       // Fetch properties for the organization
       const { data: props, error: propsError } = await supabase
         .from('properties')
         .select('*')
-        .eq('organization_id', profile.organization_id);
+        .eq('organization_id', orgId);
 
-      if (propsError) throw propsError;
-      setProperties(props || []);
+      if (propsError) {
+        console.error('Error fetching properties:', propsError);
+        setProperties([]);
+      } else {
+        setProperties(props || []);
+      }
 
-      // Fetch staff members
-      const { data: staffData, error: staffError } = await supabase
-        .from('staff_members')
-        .select('*, user_profiles:user_id(id, email, full_name, role)')
-        .in('property_id', (props || []).map(p => p.id));
+      // Fetch staff members only if we have properties
+      if (props && props.length > 0) {
+        const { data: staffData, error: staffError } = await supabase
+          .from('staff_members')
+          .select('id, user_id, property_id, department, created_at')
+          .in('property_id', props.map(p => p.id));
 
-      if (staffError) throw staffError;
-      setStaff(staffData || []);
+        if (staffError) {
+          console.error('Error fetching staff:', staffError);
+          setStaff([]);
+        } else {
+          setStaff(staffData || []);
+        }
+      }
     } catch (error) {
       console.error('Error fetching admin data:', error);
     } finally {

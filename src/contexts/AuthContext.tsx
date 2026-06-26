@@ -61,10 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data as UserProfile);
+      if (error && error.code !== 'PGRST116') throw error;
+      setProfile(data as UserProfile || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
