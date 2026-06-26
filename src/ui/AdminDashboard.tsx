@@ -7,6 +7,7 @@ interface Organization {
   name: string;
   admin_id: string;
   created_at: string;
+  pin_expires_at?: string;
 }
 
 interface Property {
@@ -43,6 +44,8 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [newPropertyName, setNewPropertyName] = useState('');
   const [showNewPropertyForm, setShowNewPropertyForm] = useState(false);
   const [propertyError, setPropertyError] = useState('');
+  const [pinExpiryDate, setPinExpiryDate] = useState<string>('');
+  const [showExpiryPicker, setShowExpiryPicker] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -165,6 +168,33 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const updatePinExpiry = async (newDate: string) => {
+    if (!selectedOrgId) return;
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ pin_expires_at: newDate })
+        .eq('id', selectedOrgId);
+
+      if (error) throw error;
+      setPinExpiryDate(newDate);
+      setShowExpiryPicker(false);
+      fetchOrganizationData();
+    } catch (error) {
+      console.error('Error updating PIN expiry:', error);
+    }
+  };
+
+  const isPinExpired = (expiryDate: string) => {
+    return new Date(expiryDate) < new Date();
+  };
+
+  const daysUntilExpiry = (expiryDate: string) => {
+    const days = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    return days;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -190,24 +220,87 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Dashboard PIN Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="font-bold text-gray-900">Dashboard PIN</h3>
-              <p className="text-2xl font-mono font-bold text-blue-600 mt-2">
-                {user?.user_metadata?.pin || '8739'}
-              </p>
+        {selectedOrgId && organizations.find(o => o.id === selectedOrgId) && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900">Dashboard PIN</h3>
+                <p className="text-2xl font-mono font-bold text-blue-600 mt-2">
+                  {user?.user_metadata?.pin || '8739'}
+                </p>
+                {organizations.find(o => o.id === selectedOrgId)?.pin_expires_at && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600">PIN Expires:</p>
+                    <p className={`font-semibold mt-1 ${
+                      isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')
+                        ? 'text-red-600'
+                        : daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') <= 7
+                        ? 'text-orange-600'
+                        : 'text-green-600'
+                    }`}>
+                      {new Date(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '').toLocaleDateString()}
+                      {!isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
+                        <span className="text-sm ml-2">
+                          ({daysUntilExpiry(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '')} days)
+                        </span>
+                      )}
+                      {isPinExpired(organizations.find(o => o.id === selectedOrgId)?.pin_expires_at || '') && (
+                        <span className="text-sm ml-2">⚠️ EXPIRED</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+
+            <div className="flex flex-wrap gap-3 mb-4">
+              <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                🔄 Reset PIN to 0000
+              </button>
+              <button className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800">
+                ✏️ Set New PIN
+              </button>
+              <button
+                onClick={() => setShowExpiryPicker(!showExpiryPicker)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                📅 Set Expiry Date
+              </button>
+            </div>
+
+            {showExpiryPicker && (
+              <div className="bg-gray-50 p-4 rounded border border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  PIN Expiration Date
+                </label>
+                <input
+                  type="date"
+                  value={pinExpiryDate || organizations.find(o => o.id === selectedOrgId)?.pin_expires_at?.split('T')[0] || ''}
+                  onChange={(e) => setPinExpiryDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded mb-3"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updatePinExpiry(pinExpiryDate)}
+                    disabled={!pinExpiryDate}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowExpiryPicker(false);
+                      setPinExpiryDate('');
+                    }}
+                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex gap-3">
-            <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-              🔄 Reset PIN to 0000
-            </button>
-            <button className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800">
-              ✏️ Set New PIN
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Organizations Section */}
         {organizations.length > 0 ? (
