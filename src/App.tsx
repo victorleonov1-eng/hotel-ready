@@ -9,6 +9,7 @@ import { ScenarioList } from './ui/ScenarioList';
 import { RolePlay } from './ui/RolePlay';
 import { ManagerView } from './ui/ManagerView';
 import { AdminDashboard } from './ui/AdminDashboard';
+import { AdminPinEntry } from './ui/AdminPinEntry';
 import { loginOrCreateProfile, recordAttempt } from './state/profiles';
 import { getAllPacks, getPack, getScenario, getScenariosByPack } from './content/registry';
 import type { UserProfile } from './content/types';
@@ -19,6 +20,7 @@ type Screen =
   | { type: 'list'; packId: string }
   | { type: 'play'; scenarioId: string; packId: string }
   | { type: 'manager' }
+  | { type: 'admin-pin' }
   | { type: 'admin' };
 
 function AppContent() {
@@ -109,7 +111,7 @@ function AppContent() {
             scenarios={currentScenarios}
             onSelect={(id) => selectScenario(id, currentPack.id)}
             onManager={() => setScreen({ type: 'manager' })}
-            onAdmin={() => setScreen({ type: 'admin' })}
+            onAdmin={() => setScreen({ type: 'admin-pin' })}
             onBack={() => {
               if (localProfile) {
                 setLocalProfile(loginOrCreateProfile(localProfile.firstName, localProfile.lastName, localProfile.pin, localProfile.position, localProfile.department) || localProfile);
@@ -138,6 +140,14 @@ function AppContent() {
             refreshProfile();
             setScreen({ type: 'practice-selector' });
           }} />
+        )}
+
+        {screen.type === 'admin-pin' && (
+          <AdminPinEntry
+            onSubmit={() => setScreen({ type: 'admin' })}
+            onBack={() => setScreen({ type: 'practice-selector' })}
+            correctPin="8739"
+          />
         )}
 
         {screen.type === 'admin' && (
