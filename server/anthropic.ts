@@ -24,8 +24,13 @@ export async function chatWithGuest(
   const block = response.content[0];
   const text = block.type === 'text' ? block.text : '';
   const clean = stripMarkdown(text);
-  const parsed = JSON.parse(clean);
-  return parsed as GuestTurn;
+  try {
+    const parsed = JSON.parse(clean);
+    return parsed as GuestTurn;
+  } catch (err) {
+    console.error('Failed to parse guest response:', clean);
+    throw new Error(`Invalid guest response format: ${clean.substring(0, 100)}`);
+  }
 }
 
 export async function scoreConversation(
