@@ -9,6 +9,7 @@ import { SessionPlayback } from './SessionPlayback';
 import type { Recording } from '../content/types';
 
 const DEFAULT_MANAGER_PIN = '0000';
+const ADMIN_PIN = '8739';
 
 type ManagerViewProps = {
   onBack: () => void;
@@ -19,13 +20,18 @@ type ViewMode = 'dashboard' | 'staff-detail' | 'analytics' | 'playback';
 export function ManagerView({ onBack }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const managerPin = (() => {
+  const [managerPin, setManagerPin] = useState(() => {
     try {
       return localStorage.getItem('hotelready.managerpin') || DEFAULT_MANAGER_PIN;
     } catch {
       return DEFAULT_MANAGER_PIN;
     }
-  })();
+  });
+  const [settingManagerPin, setSettingManagerPin] = useState(false);
+  const [newManagerPin, setNewManagerPin] = useState('');
+  const [adminMode, setAdminMode] = useState(false);
+  const [adminAuthOpen, setAdminAuthOpen] = useState(false);
+  const [adminPinInput, setAdminPinInput] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [profiles, setProfiles] = useState(loadProfiles());
@@ -45,6 +51,43 @@ export function ManagerView({ onBack }: ManagerViewProps) {
     if (pinInput === managerPin) {
       setAuthenticated(true);
       setPinInput('');
+    }
+  };
+
+  const handleResetManagerPin = () => {
+    if (confirm('Reset the Manager Dashboard PIN back to 0000?')) {
+      try {
+        localStorage.setItem('hotelready.managerpin', DEFAULT_MANAGER_PIN);
+      } catch {
+        /* ignore */
+      }
+      setManagerPin(DEFAULT_MANAGER_PIN);
+      alert('Manager Dashboard PIN reset to 0000');
+    }
+  };
+
+  const handleConfirmSetManagerPin = () => {
+    if (newManagerPin.length !== 4) {
+      alert('PIN must be 4 digits');
+      return;
+    }
+    try {
+      localStorage.setItem('hotelready.managerpin', newManagerPin);
+    } catch {
+      /* ignore */
+    }
+    setManagerPin(newManagerPin);
+    setSettingManagerPin(false);
+    setNewManagerPin('');
+    alert('Manager Dashboard PIN updated');
+  };
+
+  const handleAdminSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminPinInput === ADMIN_PIN) {
+      setAdminMode(true);
+      setAdminAuthOpen(false);
+      setAdminPinInput('');
     }
   };
 
@@ -199,6 +242,84 @@ export function ManagerView({ onBack }: ManagerViewProps) {
             </button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // Set Manager PIN Modal
+  if (settingManagerPin) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm mx-4">
+          <h3 className="text-xl font-bold text-crimson-dark mb-4">
+            Set New Manager Dashboard PIN
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">Enter a new 4-digit PIN:</p>
+          <input
+            autoFocus
+            type="password"
+            value={newManagerPin}
+            onChange={(e) => setNewManagerPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            placeholder="0000"
+            maxLength={4}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-crimson font-mono text-center text-lg"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmSetManagerPin}
+              disabled={newManagerPin.length !== 4}
+              className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => {
+                setSettingManagerPin(false);
+                setNewManagerPin('');
+              }}
+              className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Access screen (separate PIN: 8739)
+  if (adminAuthOpen && !adminMode) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <form onSubmit={handleAdminSubmit} className="w-full max-w-xs">
+          <h2 className="text-2xl font-bold text-crimson-dark mb-4 text-center">Admin Access</h2>
+          <input
+            autoFocus
+            type="password"
+            value={adminPinInput}
+            onChange={(e) => setAdminPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            placeholder="Enter PIN"
+            maxLength={4}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-crimson font-mono text-center text-lg"
+          />
+          <button
+            type="submit"
+            disabled={adminPinInput.length !== 4}
+            className="w-full bg-crimson text-white py-2 rounded-lg font-medium disabled:opacity-50 mb-2"
+          >
+            Access Admin
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAdminAuthOpen(false);
+              setAdminPinInput('');
+            }}
+            className="w-full border border-gray-300 py-2 rounded-lg font-medium text-gray-700"
+          >
+            Back
+          </button>
+        </form>
       </div>
     );
   }
@@ -490,12 +611,53 @@ export function ManagerView({ onBack }: ManagerViewProps) {
           >
             📥 Import CSV
           </button>
+          {!adminMode && (
+            <button
+              onClick={() => {
+                setAdminAuthOpen(true);
+                setAdminPinInput('');
+              }}
+              className="text-sm px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-900"
+            >
+              🛡️ Admin
+            </button>
+          )}
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-crimson-dark mb-1">Manager Dashboard</h2>
-      <p className="text-sm text-gray-600 mb-6">
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-2xl font-bold text-crimson-dark">
+          {adminMode ? 'Admin Dashboard' : 'Manager Dashboard'}
+        </h2>
+        {adminMode && (
+          <span className="text-xs px-2 py-0.5 bg-gray-800 text-white rounded-full font-semibold">
+            ADMIN
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-gray-600 mb-4">
         {profiles.length} staff member{profiles.length !== 1 ? 's' : ''} · {totalAttempts} total attempt{totalAttempts !== 1 ? 's' : ''}
       </p>
+
+      <div className="bg-gray-50 border rounded p-3 mb-6">
+        <h4 className="text-xs font-semibold text-gray-700 mb-2">Dashboard PIN</h4>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleResetManagerPin}
+            className="text-sm px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700"
+          >
+            🔄 Reset PIN to 0000
+          </button>
+          <button
+            onClick={() => {
+              setSettingManagerPin(true);
+              setNewManagerPin('');
+            }}
+            className="text-sm px-3 py-1 bg-crimson text-white rounded hover:bg-crimson-dark"
+          >
+            🔑 Set New PIN
+          </button>
+        </div>
+      </div>
 
       {showImportDialog && (
         <ImportStaffDialog
