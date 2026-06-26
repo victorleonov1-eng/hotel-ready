@@ -44,10 +44,10 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [showNewPropertyForm, setShowNewPropertyForm] = useState(false);
 
   useEffect(() => {
-    if (profile?.organization_id) {
+    if (user?.id) {
       fetchOrganizationData();
     }
-  }, [profile]);
+  }, [user]);
 
   const fetchOrganizationData = async () => {
     try {
