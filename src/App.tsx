@@ -8,6 +8,7 @@ import { PracticeAreaSelector } from './ui/PracticeAreaSelector';
 import { ScenarioList } from './ui/ScenarioList';
 import { RolePlay } from './ui/RolePlay';
 import { ManagerView } from './ui/ManagerView';
+import { AdminDashboard } from './ui/AdminDashboard';
 import { loginOrCreateProfile, recordAttempt } from './state/profiles';
 import { getAllPacks, getPack, getScenario, getScenariosByPack } from './content/registry';
 import type { UserProfile } from './content/types';
@@ -140,8 +141,7 @@ function AppContent() {
         )}
 
         {screen.type === 'admin' && (
-          <ManagerView
-            startInAdmin
+          <AdminDashboard
             onBack={() => {
               refreshProfile();
               setScreen({ type: 'practice-selector' });
