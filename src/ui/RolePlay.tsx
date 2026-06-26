@@ -244,16 +244,19 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario, messages: apiMessages }),
       });
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
+      const guestText = data.reply || data.text;
+      if (!guestText) throw new Error('Empty response from API');
       const guestTimestamp = Date.now();
       const guestMsg: Message = {
         role: 'guest',
-        text: data.reply || data.text,
+        text: guestText,
         emotion: data.emotion,
         timestamp: guestTimestamp,
       };
       setMessages([...updated, guestMsg]);
-      speak(data.reply || data.text, data.emotion, guestTimestamp);
+      speak(guestText, data.emotion, guestTimestamp);
     } catch (err) {
       const errorTimestamp = Date.now();
       setMessages([...updated, { role: 'guest', text: '(Error getting response. Try again.)', timestamp: errorTimestamp }]);
@@ -476,14 +479,23 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
                 )}
 
                 <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
+                  <textarea
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                    placeholder="Type your response..."
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-crimson"
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      e.target.style.height = 'auto';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Type your response... (Shift+Enter for new line)"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-crimson resize-none overflow-y-auto"
                     disabled={loading}
+                    rows={2}
                   />
                   {hasSpeechRecognition && (
                     <button
