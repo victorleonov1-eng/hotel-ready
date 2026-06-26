@@ -6,10 +6,11 @@ type Props = {
   scenarios: any[];
   onSelect: (scenarioId: string) => void;
   onManager: () => void;
+  onAdmin: () => void;
   onBack: () => void;
 };
 
-export function ScenarioList({ profile, scenarios, onSelect, onManager, onBack }: Props) {
+export function ScenarioList({ profile, scenarios, onSelect, onManager, onAdmin, onBack }: Props) {
   return (
     <div className="px-4 py-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-4">
@@ -19,6 +20,9 @@ export function ScenarioList({ profile, scenarios, onSelect, onManager, onBack }
         <div className="flex gap-2">
           <button onClick={onManager} className="text-sm text-teal underline">
             Manager view
+          </button>
+          <button onClick={onAdmin} className="text-sm text-teal underline">
+            Admin view
           </button>
           <button onClick={onBack} className="text-sm text-gray-400 underline">
             Sign out

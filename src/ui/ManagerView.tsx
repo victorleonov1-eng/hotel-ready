@@ -13,11 +13,12 @@ const ADMIN_PIN = '8739';
 
 type ManagerViewProps = {
   onBack: () => void;
+  startInAdmin?: boolean;
 };
 
 type ViewMode = 'dashboard' | 'staff-detail' | 'analytics' | 'playback';
 
-export function ManagerView({ onBack }: ManagerViewProps) {
+export function ManagerView({ onBack, startInAdmin = false }: ManagerViewProps) {
   const [authenticated, setAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [managerPin, setManagerPin] = useState(() => {
@@ -30,7 +31,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
   const [settingManagerPin, setSettingManagerPin] = useState(false);
   const [newManagerPin, setNewManagerPin] = useState('');
   const [adminMode, setAdminMode] = useState(false);
-  const [adminAuthOpen, setAdminAuthOpen] = useState(false);
+  const [adminAuthOpen, setAdminAuthOpen] = useState(startInAdmin);
   const [adminPinInput, setAdminPinInput] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
@@ -314,6 +315,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
             onClick={() => {
               setAdminAuthOpen(false);
               setAdminPinInput('');
+              if (!authenticated) onBack();
             }}
             className="w-full border border-gray-300 py-2 rounded-lg font-medium text-gray-700"
           >
@@ -324,7 +326,7 @@ export function ManagerView({ onBack }: ManagerViewProps) {
     );
   }
 
-  if (!authenticated) {
+  if (!authenticated && !adminMode) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <form onSubmit={handlePinSubmit} className="w-full max-w-xs">

@@ -15,7 +15,8 @@ type Screen =
   | { type: 'practice-selector' }
   | { type: 'list'; packId: string }
   | { type: 'play'; scenarioId: string; packId: string }
-  | { type: 'manager' };
+  | { type: 'manager' }
+  | { type: 'admin' };
 
 function App() {
   const [screen, setScreen] = useState<Screen>({ type: 'login' });
@@ -89,6 +90,7 @@ function App() {
             scenarios={currentScenarios}
             onSelect={(id) => selectScenario(id, currentPack.id)}
             onManager={() => setScreen({ type: 'manager' })}
+            onAdmin={() => setScreen({ type: 'admin' })}
             onBack={() => {
               if (profile) {
                 setProfile(loginOrCreateProfile(profile.firstName, profile.lastName, profile.pin, profile.position, profile.department) || profile);
@@ -117,6 +119,16 @@ function App() {
             refreshProfile();
             setScreen({ type: 'practice-selector' });
           }} />
+        )}
+
+        {screen.type === 'admin' && (
+          <ManagerView
+            startInAdmin
+            onBack={() => {
+              refreshProfile();
+              setScreen({ type: 'practice-selector' });
+            }}
+          />
         )}
       </main>
 
