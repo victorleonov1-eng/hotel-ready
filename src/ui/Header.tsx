@@ -5,9 +5,10 @@ const HOTEL_NAME = 'Hotel Name';
 type HeaderProps = {
   onMuteToggle?: (muted: boolean) => void;
   muted?: boolean;
+  onLogout?: () => void;
 };
 
-export function Header({ onMuteToggle, muted = false }: HeaderProps) {
+export function Header({ onMuteToggle, muted = false, onLogout }: HeaderProps) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -31,15 +32,26 @@ export function Header({ onMuteToggle, muted = false }: HeaderProps) {
             {dateStr} {timeStr}
           </div>
         </div>
-        {onMuteToggle && (
-          <button
-            onClick={() => onMuteToggle(!muted)}
-            className="px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-sm font-medium transition"
-            title={muted ? 'Unmute guest audio' : 'Mute guest audio'}
-          >
-            {muted ? '🔇' : '🔊'}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onMuteToggle && (
+            <button
+              onClick={() => onMuteToggle(!muted)}
+              className="px-3 py-1 rounded bg-white/20 hover:bg-white/30 text-sm font-medium transition"
+              title={muted ? 'Unmute guest audio' : 'Mute guest audio'}
+            >
+              {muted ? '🔇' : '🔊'}
+            </button>
+          )}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="px-4 py-1 rounded bg-white/20 hover:bg-white/30 text-sm font-medium transition"
+              title="Sign out"
+            >
+              Sign Out
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );
