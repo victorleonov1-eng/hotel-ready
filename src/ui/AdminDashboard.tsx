@@ -128,6 +128,22 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const deleteProperty = async (propertyId: string) => {
+    if (!confirm('Are you sure you want to delete this location? This will remove all associated staff assignments.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId);
+
+      if (error) throw error;
+      fetchOrganizationData();
+    } catch (error) {
+      console.error('Error deleting property:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -258,10 +274,20 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                 .filter((p) => p.organization_id === selectedOrgId)
                 .map((property) => (
                   <div key={property.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <h4 className="font-bold text-gray-900">{property.name}</h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {staff.filter((s) => s.property_id === property.id).length} staff members
-                    </p>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900">{property.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {staff.filter((s) => s.property_id === property.id).length} staff members
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteProperty(property.id)}
+                        className="ml-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
             </div>
