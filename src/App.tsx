@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthScreen } from './ui/AuthScreen';
 import { Header } from './ui/Header';
 import { Footer } from './ui/Footer';
 import { WhoAreYou } from './ui/WhoAreYou';
@@ -18,21 +20,35 @@ type Screen =
   | { type: 'manager' }
   | { type: 'admin' };
 
-function App() {
+function AppContent() {
+  const { user, profile, loading, logout } = useAuth();
   const [screen, setScreen] = useState<Screen>({ type: 'login' });
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [localProfile, setLocalProfile] = useState<UserProfile | null>(null);
   const [muted, setMuted] = useState(false);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block bg-red-700 text-white px-8 py-4 rounded-lg mb-4">
+            <h1 className="text-3xl font-bold">HOTEL Ready</h1>
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  // User is logged in - show staff training interface for now
   function handleLogin(firstName: string, lastName: string, pin: string, position: string, department: any) {
-    console.log('handleLogin called:', { firstName, lastName, pin, position, department });
     const p = loginOrCreateProfile(firstName, lastName, pin, position, department);
-    console.log('loginOrCreateProfile returned:', p);
     if (p) {
-      console.log('Setting profile and navigating to practice-selector');
-      setProfile(p);
+      setLocalProfile(p);
       setScreen({ type: 'practice-selector' });
-    } else {
-      console.log('Profile is null - PIN may be incorrect');
     }
   }
 
@@ -45,21 +61,22 @@ function App() {
   }
 
   function refreshProfile() {
-    if (profile) {
-      const p = loginOrCreateProfile(profile.firstName, profile.lastName, profile.pin, profile.position, profile.department);
-      if (p) setProfile(p);
+    if (localProfile) {
+      const p = loginOrCreateProfile(localProfile.firstName, localProfile.lastName, localProfile.pin, localProfile.position, localProfile.department);
+      if (p) setLocalProfile(p);
     }
   }
 
   function handleScenarioDone(score: number, seconds: number, usedCards: boolean, recordingId: string) {
-    if (!profile) return;
+    if (!localProfile) return;
     const currentScreen = screen as any;
-    recordAttempt(profile.firstName, profile.lastName, currentScreen.scenarioId, score, seconds, usedCards, recordingId);
+    recordAttempt(localProfile.firstName, localProfile.lastName, currentScreen.scenarioId, score, seconds, usedCards, recordingId);
     refreshProfile();
   }
 
-  function logout() {
-    setProfile(null);
+  async function handleLogout() {
+    await logout();
+    setLocalProfile(null);
     setScreen({ type: 'login' });
   }
 
@@ -73,39 +90,39 @@ function App() {
       <Header muted={muted} onMuteToggle={setMuted} />
 
       <main className="flex-1">
-        {screen.type === 'login' && <WhoAreYou onSubmit={handleLogin} />}
+        {screen.type === 'login' && !localProfile && <WhoAreYou onSubmit={handleLogin} />}
 
-        {screen.type === 'practice-selector' && profile && (
+        {screen.type === 'practice-selector' && localProfile && (
           <PracticeAreaSelector
             packs={allPacks}
-            profile={profile}
+            profile={localProfile}
             onSelect={selectPracticeArea}
-            onLogout={logout}
+            onLogout={handleLogout}
           />
         )}
 
-        {screen.type === 'list' && profile && currentPack && (
+        {screen.type === 'list' && localProfile && currentPack && (
           <ScenarioList
-            profile={profile}
+            profile={localProfile}
             packId={currentPack.id}
             scenarios={currentScenarios}
             onSelect={(id) => selectScenario(id, currentPack.id)}
             onManager={() => setScreen({ type: 'manager' })}
             onAdmin={() => setScreen({ type: 'admin' })}
             onBack={() => {
-              if (profile) {
-                setProfile(loginOrCreateProfile(profile.firstName, profile.lastName, profile.pin, profile.position, profile.department) || profile);
+              if (localProfile) {
+                setLocalProfile(loginOrCreateProfile(localProfile.firstName, localProfile.lastName, localProfile.pin, localProfile.position, localProfile.department) || localProfile);
               }
               setScreen({ type: 'practice-selector' });
             }}
           />
         )}
 
-        {screen.type === 'play' && profile && currentScenario && (
+        {screen.type === 'play' && localProfile && currentScenario && (
           <RolePlay
             key={currentScenario.id}
             scenario={currentScenario}
-            bestTime={profile.bestTimeByScenario[currentScenario.id]}
+            bestTime={localProfile.bestTimeByScenario[currentScenario.id]}
             onDone={handleScenarioDone}
             onBack={() => {
               refreshProfile();
@@ -135,6 +152,14 @@ function App() {
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
