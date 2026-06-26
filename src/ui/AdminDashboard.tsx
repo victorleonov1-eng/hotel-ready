@@ -152,8 +152,21 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
           <p className="text-gray-600">Manage your hotel properties and staff</p>
         </div>
 
+        {/* Dashboard PIN Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+          <h3 className="font-bold text-gray-900 mb-4">Dashboard PIN</h3>
+          <div className="flex gap-3">
+            <button className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+              🔄 Reset PIN to 0000
+            </button>
+            <button className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800">
+              ✏️ Set New PIN
+            </button>
+          </div>
+        </div>
+
         {/* Organizations Section */}
-        {organizations.length > 0 && (
+        {organizations.length > 0 ? (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
               Your Organizations
@@ -179,6 +192,13 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                 </div>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
+            <p className="text-gray-600 text-lg mb-4">No organizations found</p>
+            <p className="text-gray-500 text-sm">
+              Your organization should appear here. If you just created an account, please refresh the page.
+            </p>
           </div>
         )}
 
