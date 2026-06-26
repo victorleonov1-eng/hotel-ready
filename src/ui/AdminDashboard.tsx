@@ -411,68 +411,73 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {/* Properties Section */}
-        {selectedOrgId && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-900">
-                Locations
-                <span className="ml-2 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                  {properties.filter((p) => p.organization_id === selectedOrgId).length}
-                </span>
-              </h3>
+        {/* All Locations Section - Global View */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-gray-900">
+              All Locations
+              <span className="ml-2 inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {properties.length}
+              </span>
+            </h3>
+            {selectedOrgId && (
               <button
                 onClick={() => setShowNewPropertyForm(!showNewPropertyForm)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
-                + Add Location
+                + Add Location to {organizations.find(o => o.id === selectedOrgId)?.name}
               </button>
-            </div>
-
-            {showNewPropertyForm && (
-              <div className="mb-4 p-4 bg-gray-50 rounded border border-gray-200">
-                {propertyError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                    {propertyError}
-                  </div>
-                )}
-                <input
-                  type="text"
-                  value={newPropertyName}
-                  onChange={(e) => setNewPropertyName(e.target.value)}
-                  placeholder="Location name (e.g., Downtown, Airport, Mall)"
-                  className="w-full px-4 py-2 border border-gray-300 rounded mb-2"
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={addProperty}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowNewPropertyForm(false);
-                      setPropertyError('');
-                    }}
-                    className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
             )}
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {properties
-                .filter((p) => p.organization_id === selectedOrgId)
-                .map((property) => (
+          {showNewPropertyForm && selectedOrgId && (
+            <div className="mb-4 p-4 bg-gray-50 rounded border border-gray-200">
+              {propertyError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                  {propertyError}
+                </div>
+              )}
+              <input
+                type="text"
+                value={newPropertyName}
+                onChange={(e) => setNewPropertyName(e.target.value)}
+                placeholder="Location name (e.g., Downtown, Airport, Mall)"
+                className="w-full px-4 py-2 border border-gray-300 rounded mb-2"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={addProperty}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNewPropertyForm(false);
+                    setPropertyError('');
+                  }}
+                  className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {properties.length > 0 ? (
+            <div className="space-y-3">
+              {properties.map((property) => {
+                const org = organizations.find(o => o.id === property.organization_id);
+                return (
                   <div key={property.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900">{property.name}</h4>
                         <p className="text-sm text-gray-600 mt-1">
+                          Organization: <span className="font-semibold">{org?.name || 'Unknown'}</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
                           {staff.filter((s) => s.property_id === property.id).length} staff members
                         </p>
                       </div>
@@ -484,10 +489,13 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                       </button>
                     </div>
                   </div>
-                ))}
+                );
+              })}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-gray-600 text-center py-8">No locations yet. Select an organization and add one!</p>
+          )}
+        </div>
 
         {/* Team Members Section */}
         {selectedOrgId && (
