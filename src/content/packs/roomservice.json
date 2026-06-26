@@ -1,0 +1,28 @@
+{
+  "id": "roomservice",
+  "department": "Room Service",
+  "scenarios": [
+    {
+      "id": "rs-01",
+      "title": "Room service order takes longer than expected — guest is frustrated",
+      "situation": "A guest ordered room service 45 minutes ago. The expected time was 25 minutes. They call the kitchen/reception to follow up. They're starting to get frustrated.",
+      "guestPersona": "Guest with plans or time constraints. They don't mind waiting if they know what's happening, but uncertainty and no communication frustrate them. They want a realistic update and a genuine apology.",
+      "guestOpeningLine": "Hi, I ordered room service almost 45 minutes ago and it still isn't here. What's happening?",
+      "difficultyNote": "If staff member sincerely apologises, explains the specific reason (busy kitchen, special preparation, unavoidable delay), gives an exact ETA ('5 more minutes'), and offers a small gesture (complimentary item, discount), guest feels mollified. If staff member seems annoyed or defensive, guest becomes more irritated. If there's no honest explanation, guest loses trust.",
+      "skills": ["accountability", "transparency", "recovery"],
+      "businessOutcome": "Guest satisfaction, retention",
+      "successCriteria": "Apologises sincerely without excuses, explains the specific reason honestly, provides a clear ETA, offers a token gesture, and ensures the food arrives at the promised time or provides a discount if it doesn't."
+    },
+    {
+      "id": "rs-02",
+      "title": "Room service brought the wrong order or forgot items",
+      "situation": "Room service arrives. The guest ordered a salad with dressing on the side, but it came with dressing already mixed in. They also ordered a side of fries but they're not in the bag.",
+      "guestPersona": "Guest who has specific preferences and is disappointed but not angry — just frustrated that they have to send food back. They want a quick, hassle-free replacement.",
+      "guestOpeningLine": "I'm sorry, but this isn't quite right. The dressing should have been on the side, and I don't see the fries.",
+      "difficultyNote": "If staff member immediately apologises, takes the plate back without blame-shifting, confirms the correct order, and returns promptly with the right items, guest is satisfied. If staff member argues ('the salad is fine like this') or makes the guest feel at fault ('you should have been more specific'), guest becomes upset. If the replacement takes too long, guest loses their appetite.",
+      "skills": ["accountability", "service recovery", "speed"],
+      "businessOutcome": "Guest satisfaction, food quality",
+      "successCriteria": "Apologises immediately without defensiveness, takes responsibility for the error, confirms the correct order by repeating it back, and returns with the correct items within 10 minutes. Offers a gesture (complimentary dessert or drink) to acknowledge the inconvenience."
+    }
+  ]
+}
