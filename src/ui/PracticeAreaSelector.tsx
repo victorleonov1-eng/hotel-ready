@@ -10,23 +10,6 @@ type PracticeSelectorProps = {
 export function PracticeAreaSelector({ packs, profile, onSelect, onLogout }: PracticeSelectorProps) {
   const isManagerOrGM = profile.department === 'GM' || profile.department === 'MANAGER';
 
-  const getDepartmentLabel = (dept: string): string => {
-    const deptMap: Record<string, string> = {
-      'FO': 'Front Office',
-      'F&B': 'Food & Beverage Service',
-      'HK': 'Housekeeping',
-      'RS': 'Room Service',
-      'CONCIERGE': 'Concierge',
-      'FIN': 'Finance',
-      'KITCHEN': 'Kitchen',
-      'TECH': 'Technical / Maintenance',
-      'MANAGER': 'Manager',
-      'GM': 'General Manager',
-      'OTHER': 'Other'
-    };
-    return deptMap[dept] || dept;
-  };
-
   const matchesDepartment = (packDept: string): boolean => {
     if (isManagerOrGM) return true;
     // Map pack departments to user department codes
