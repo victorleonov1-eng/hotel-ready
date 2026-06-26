@@ -42,6 +42,7 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [newPropertyName, setNewPropertyName] = useState('');
   const [showNewPropertyForm, setShowNewPropertyForm] = useState(false);
+  const [propertyError, setPropertyError] = useState('');
 
   useEffect(() => {
     if (user?.id) {
@@ -109,9 +110,21 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   };
 
   const addProperty = async () => {
-    if (!newPropertyName.trim() || !selectedOrgId) return;
+    setPropertyError('');
+
+    if (!newPropertyName.trim()) {
+      setPropertyError('Please enter a location name');
+      return;
+    }
+
+    if (!selectedOrgId) {
+      setPropertyError('Please select an organization');
+      return;
+    }
 
     try {
+      console.log('Adding property:', { organizationId: selectedOrgId, name: newPropertyName });
+
       const { error } = await supabase
         .from('properties')
         .insert({
@@ -119,12 +132,20 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
           name: newPropertyName,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Property added successfully');
       setNewPropertyName('');
       setShowNewPropertyForm(false);
+      setPropertyError('');
       fetchOrganizationData();
     } catch (error) {
-      console.error('Error adding property:', error);
+      const message = error instanceof Error ? error.message : JSON.stringify(error);
+      console.error('Error adding property:', message);
+      setPropertyError(`Error: ${message}`);
     }
   };
 
@@ -245,12 +266,18 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
 
             {showNewPropertyForm && (
               <div className="mb-4 p-4 bg-gray-50 rounded border border-gray-200">
+                {propertyError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                    {propertyError}
+                  </div>
+                )}
                 <input
                   type="text"
                   value={newPropertyName}
                   onChange={(e) => setNewPropertyName(e.target.value)}
                   placeholder="Location name (e.g., Downtown, Airport, Mall)"
                   className="w-full px-4 py-2 border border-gray-300 rounded mb-2"
+                  autoFocus
                 />
                 <div className="flex gap-2">
                   <button
@@ -260,7 +287,10 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                     Save
                   </button>
                   <button
-                    onClick={() => setShowNewPropertyForm(false)}
+                    onClick={() => {
+                      setShowNewPropertyForm(false);
+                      setPropertyError('');
+                    }}
                     className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
                   >
                     Cancel
