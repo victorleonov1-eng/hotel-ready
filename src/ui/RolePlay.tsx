@@ -183,7 +183,7 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       .join('\n');
 
     try {
-      const res = await fetch('/api/answer-options', {
+      const res = await apiFetch('/api/answer-options', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario, transcript }),
@@ -239,7 +239,7 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         content: m.text,
       }));
 
-      const res = await fetch('/api/guest-turn', {
+      const res = await apiFetch('/api/guest-turn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario, messages: apiMessages }),
@@ -270,7 +270,7 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       .join('\n');
 
     try {
-      const res = await fetch('/api/score', {
+      const res = await apiFetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario, transcript }),
