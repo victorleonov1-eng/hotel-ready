@@ -78,6 +78,7 @@ function App() {
         {screen.type === 'practice-selector' && profile && (
           <PracticeAreaSelector
             packs={allPacks}
+            profile={profile}
             onSelect={selectPracticeArea}
             onLogout={logout}
           />
