@@ -5,9 +5,10 @@ type PracticeSelectorProps = {
   profile: UserProfile;
   onSelect: (packId: string) => void;
   onLogout: () => void;
+  onManagerView?: () => void;
 };
 
-export function PracticeAreaSelector({ packs, profile, onSelect, onLogout }: PracticeSelectorProps) {
+export function PracticeAreaSelector({ packs, profile, onSelect, onLogout, onManagerView }: PracticeSelectorProps) {
   const isManagerOrGM = profile.department === 'GM' || profile.department === 'MANAGER';
 
   const matchesDepartment = (packDept: string): boolean => {
@@ -26,9 +27,19 @@ export function PracticeAreaSelector({ packs, profile, onSelect, onLogout }: Pra
     <div className="px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-crimson-dark">Choose a Practice Area</h2>
-        <button onClick={onLogout} className="text-sm text-gray-400 underline">
-          Sign out
-        </button>
+        <div className="flex items-center gap-3">
+          {isManagerOrGM && onManagerView && (
+            <button
+              onClick={onManagerView}
+              className="text-sm text-gray-400 underline"
+            >
+              👥 Manager view
+            </button>
+          )}
+          <button onClick={onLogout} className="text-sm text-gray-400 underline">
+            Sign out
+          </button>
+        </div>
       </div>
       <p className="text-gray-600 mb-6">Pick a department to practise with real guest scenarios.</p>
 

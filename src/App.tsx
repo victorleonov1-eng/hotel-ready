@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthScreen } from './ui/AuthScreen';
 import { Header } from './ui/Header';
@@ -10,8 +10,12 @@ import { RolePlay } from './ui/RolePlay';
 import { ManagerView } from './ui/ManagerView';
 import { AdminDashboard } from './ui/AdminDashboard';
 import { AdminPinEntry } from './ui/AdminPinEntry';
+import { ManagerPinEntry } from './ui/ManagerPinEntry';
+import { CompanyDashboard } from './ui/CompanyDashboard';
+import { ManagerDashboard } from './ui/ManagerDashboard';
 import { loginOrCreateProfile, recordAttempt } from './state/profiles';
 import { getAllPacks, getPack, getScenario, getScenariosByPack } from './content/registry';
+import { supabase } from './lib/supabase';
 import type { UserProfile } from './content/types';
 
 type Screen =
@@ -20,6 +24,8 @@ type Screen =
   | { type: 'list'; packId: string }
   | { type: 'play'; scenarioId: string; packId: string }
   | { type: 'manager' }
+  | { type: 'manager-pin' }
+  | { type: 'manager-dashboard' }
   | { type: 'admin-pin' }
   | { type: 'admin' };
 
@@ -28,6 +34,51 @@ function AppContent() {
   const [screen, setScreen] = useState<Screen>({ type: 'login' });
   const [localProfile, setLocalProfile] = useState<UserProfile | null>(null);
   const [muted, setMuted] = useState(false);
+  const [orgPinExpired, setOrgPinExpired] = useState(false);
+  const [adminPinVerified, setAdminPinVerified] = useState(() => {
+    return localStorage.getItem('adminPinVerified') === 'true';
+  });
+  const [managerStaffId, setManagerStaffId] = useState<string | null>(null);
+  const [staffLoginMode, setStaffLoginMode] = useState(false);
+
+  const handleManagerView = () => {
+    if (localProfile) {
+      setScreen({ type: 'manager-pin' });
+    }
+  };
+
+  const handleManagerPinSubmit = () => {
+    if (localProfile) {
+      // Use PIN as manager ID (unique identifier)
+      const managerId = localProfile.pin;
+      setManagerStaffId(managerId);
+      setScreen({ type: 'manager-dashboard' });
+    }
+  };
+
+  useEffect(() => {
+    const checkOrgPinExpiry = async () => {
+      if (user && profile?.organization_id) {
+        try {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('pin_expires_at')
+            .eq('id', profile.organization_id)
+            .single();
+
+          if (org?.pin_expires_at) {
+            const expiryDate = new Date(org.pin_expires_at);
+            const isExpired = expiryDate < new Date();
+            setOrgPinExpired(isExpired);
+          }
+        } catch (error) {
+          console.error('Error checking organization PIN expiry:', error);
+        }
+      }
+    };
+
+    checkOrgPinExpiry();
+  }, [user, profile]);
 
   if (loading) {
     return (
@@ -42,8 +93,76 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return <AuthScreen />;
+  // Show admin dashboard if PIN verified from login screen
+  if (adminPinVerified && !user) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <Header muted={muted} onMuteToggle={setMuted} onLogout={() => {
+          localStorage.removeItem('adminPinVerified');
+          setAdminPinVerified(false);
+        }} />
+        <main className="flex-1">
+          <AdminDashboard
+            onBack={() => {
+              localStorage.removeItem('adminPinVerified');
+              setAdminPinVerified(false);
+            }}
+          />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show auth screen only if no Supabase user AND no local profile
+  if (!user && !localProfile) {
+    if (staffLoginMode) {
+      // Show staff training interface - will render WhoAreYou when screen type is 'login'
+      // Fall through to continue rendering
+    } else {
+      return <AuthScreen onStaffLogin={() => setStaffLoginMode(true)} />;
+    }
+  }
+
+  // Show Company Dashboard for logged-in organization users
+  if (user && profile?.organization_id && !adminPinVerified) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <main className="flex-1">
+          <CompanyDashboard
+            onLogout={handleLogout}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (orgPinExpired && profile?.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <div className="inline-block bg-red-700 text-white px-8 py-4 rounded-lg mb-6">
+            <h1 className="text-3xl font-bold">HOTEL Ready</h1>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-8 border border-gray-200">
+            <p className="text-6xl mb-4">🔒</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Awaiting Approval</h2>
+            <p className="text-gray-600 mb-4">
+              Your organization is pending admin approval. The administrator needs to authorize your access and set an expiration date for your PIN.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Please contact your administrator to proceed.
+            </p>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-blue-600 text-white font-semibold py-3 rounded hover:bg-blue-700 transition"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // User is logged in - show staff training interface for now
@@ -80,6 +199,7 @@ function AppContent() {
   async function handleLogout() {
     await logout();
     setLocalProfile(null);
+    setStaffLoginMode(false);
     setScreen({ type: 'login' });
   }
 
@@ -93,7 +213,12 @@ function AppContent() {
       <Header muted={muted} onMuteToggle={setMuted} onLogout={user ? handleLogout : undefined} />
 
       <main className="flex-1">
-        {screen.type === 'login' && !localProfile && <WhoAreYou onSubmit={handleLogin} />}
+        {screen.type === 'login' && !localProfile && (
+          <WhoAreYou
+            onSubmit={handleLogin}
+            onSignOut={() => setStaffLoginMode(false)}
+          />
+        )}
 
         {screen.type === 'practice-selector' && localProfile && (
           <PracticeAreaSelector
@@ -101,6 +226,7 @@ function AppContent() {
             profile={localProfile}
             onSelect={selectPracticeArea}
             onLogout={handleLogout}
+            onManagerView={handleManagerView}
           />
         )}
 
@@ -110,7 +236,7 @@ function AppContent() {
             packId={currentPack.id}
             scenarios={currentScenarios}
             onSelect={(id) => selectScenario(id, currentPack.id)}
-            onManager={() => setScreen({ type: 'manager' })}
+            onManager={handleManagerView}
             onAdmin={() => setScreen({ type: 'admin-pin' })}
             onBack={() => {
               if (localProfile) {
@@ -140,6 +266,25 @@ function AppContent() {
             refreshProfile();
             setScreen({ type: 'practice-selector' });
           }} />
+        )}
+
+        {screen.type === 'manager-pin' && localProfile && (
+          <ManagerPinEntry
+            correctPin={localProfile.pin}
+            onSubmit={handleManagerPinSubmit}
+            onBack={() => setScreen({ type: 'practice-selector' })}
+          />
+        )}
+
+        {screen.type === 'manager-dashboard' && managerStaffId && localProfile && (
+          <ManagerDashboard
+            managerId={managerStaffId}
+            managerName={`${localProfile.firstName} ${localProfile.lastName}`}
+            onBack={() => {
+              setManagerStaffId(null);
+              setScreen({ type: 'practice-selector' });
+            }}
+          />
         )}
 
         {screen.type === 'admin-pin' && (

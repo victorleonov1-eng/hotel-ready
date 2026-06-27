@@ -89,12 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('User created:', authData.user.id);
 
-      // Create organization
+      // Create organization with PIN expiry set to today (0 days = expired/pending approval)
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .insert({
           name: orgName,
           admin_id: authData.user.id,
+          pin_expires_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -123,6 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Profile created successfully');
+
+      // Sign out after registration so they see the approval screen
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('Registration error:', error);
       throw error;

@@ -13,6 +13,7 @@ const app = express();
 app.use(cors({
   origin: [
     'https://hotel-ready.vercel.app',
+    'http://localhost:5173', // for local development (Vite)
     'http://localhost:5174', // for local development
   ],
   credentials: true,

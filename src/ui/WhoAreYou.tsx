@@ -4,6 +4,7 @@ import type { Department } from '../content/types';
 type LoginProps = {
   onSubmit: (firstName: string, lastName: string, pin: string, position: string, department: Department) => void;
   error?: string;
+  onSignOut?: () => void;
 };
 
 const DEPARTMENTS: { value: Department; label: string }[] = [
@@ -18,7 +19,7 @@ const DEPARTMENTS: { value: Department; label: string }[] = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-export function WhoAreYou({ onSubmit, error }: LoginProps) {
+export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [pin, setPin] = useState('');
@@ -55,7 +56,15 @@ export function WhoAreYou({ onSubmit, error }: LoginProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 relative">
+      {onSignOut && (
+        <button
+          onClick={onSignOut}
+          className="absolute top-4 right-4 text-sm text-gray-500 hover:text-gray-700 underline"
+        >
+          ← Back to Login
+        </button>
+      )}
       <h2 className="text-2xl font-bold text-crimson-dark mb-2">Welcome to HOTEL Ready</h2>
       <p className="text-gray-600 mb-6 text-center max-w-sm">
         Sign in to practise real guest conversations and get instant coaching.

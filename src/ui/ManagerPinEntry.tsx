@@ -1,18 +1,28 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-export function AdminPinEntry({
+export function ManagerPinEntry({
   onSubmit,
   onBack,
-  correctPin = '8739'
+  correctPin
 }: {
   onSubmit: () => void;
   onBack: () => void;
-  correctPin?: string;
+  correctPin: string;
 }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus the input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = () => {
+    if (pin.length !== 4) {
+      setError('PIN must be 4 digits.');
+      return;
+    }
     if (pin === correctPin) {
       setError('');
       onSubmit();
@@ -26,8 +36,8 @@ export function AdminPinEntry({
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Access</h1>
-          <p className="text-gray-600">Enter your PIN to continue</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Manager View</h1>
+          <p className="text-gray-600">Enter your PIN to access team dashboard</p>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-8 border border-gray-200">
@@ -38,6 +48,7 @@ export function AdminPinEntry({
           )}
 
           <input
+            ref={inputRef}
             type="password"
             maxLength={4}
             value={pin}
@@ -45,7 +56,7 @@ export function AdminPinEntry({
             onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
             placeholder="Enter PIN"
             className="w-full text-center text-4xl font-bold tracking-widest px-4 py-3 border-2 border-gray-300 rounded mb-4 focus:border-blue-500 focus:outline-none"
-            autoFocus
+            data-testid="manager-pin-input"
           />
 
           <button
@@ -53,7 +64,7 @@ export function AdminPinEntry({
             disabled={pin.length !== 4}
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition mb-3"
           >
-            Access Dashboard
+            Access Team Dashboard
           </button>
 
           <button
