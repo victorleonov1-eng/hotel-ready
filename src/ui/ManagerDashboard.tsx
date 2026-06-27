@@ -299,7 +299,7 @@ export function ManagerDashboard({
   };
 
   const handlePrintReport = () => {
-    const { sessions: reportSessions } = getFilteredDataByDepartment(departmentFilter === 'all' ? null : departmentFilter);
+    const { staff: reportStaff, sessions: reportSessions } = getFilteredDataByDepartment(departmentFilter === 'all' ? null : departmentFilter);
     const highScores = reportSessions.filter(s => (s.score || 0) >= 85).length;
     const mediumScores = reportSessions.filter(s => (s.score || 0) >= 70 && (s.score || 0) < 85).length;
     const lowScores = reportSessions.filter(s => (s.score || 0) < 70).length;
@@ -506,7 +506,7 @@ export function ManagerDashboard({
               </tr>
             </thead>
             <tbody>
-              ${staffMembers.length > 0 ? staffMembers.map(staff => {
+              ${reportStaff.length > 0 ? reportStaff.map(staff => {
                 const staffSessions = sessions.filter(s => s.staff_id === staff.id);
                 const scores = staffSessions.map(s => s.score || 0);
                 const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
