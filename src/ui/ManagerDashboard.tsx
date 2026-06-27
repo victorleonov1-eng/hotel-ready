@@ -172,15 +172,17 @@ export function ManagerDashboard({
         return;
       }
 
-      // First, check what organization_id the staff member has
+      // First, check what organization_id and user_id the staff member has
       const { data: staffData } = await supabase
         .from('staff_members')
-        .select('organization_id')
+        .select('organization_id, user_id')
         .eq('id', staffId)
         .single();
 
       console.log('Staff member org_id:', staffData?.organization_id);
+      console.log('Staff member user_id:', staffData?.user_id);
       console.log('Current org_id:', organizationId);
+      console.log('Current user_id:', userId);
 
       const { data, error } = await supabase
         .from('staff_members')
