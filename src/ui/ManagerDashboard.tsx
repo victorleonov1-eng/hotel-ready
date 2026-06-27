@@ -47,6 +47,8 @@ export function ManagerDashboard({
   const [resetPinId, setResetPinId] = useState<string | null>(null);
   const [newPin, setNewPin] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showManagerPinReset, setShowManagerPinReset] = useState(false);
+  const [managerNewPin, setManagerNewPin] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -165,6 +167,33 @@ export function ManagerDashboard({
     }
   };
 
+  const resetManagerPin = async (newPinValue?: string) => {
+    const pinValue = newPinValue || managerNewPin;
+
+    if (pinValue.length !== 4) {
+      alert('PIN must be 4 digits.');
+      return;
+    }
+
+    try {
+      if (organizationId) {
+        const { error } = await supabase
+          .from('organizations')
+          .update({ manager_pin: pinValue })
+          .eq('id', organizationId);
+
+        if (error) throw error;
+      }
+
+      setShowManagerPinReset(false);
+      setManagerNewPin('');
+      alert(`Manager PIN reset to ${pinValue}`);
+    } catch (error) {
+      console.error('Error resetting manager PIN:', error);
+      alert('Failed to reset PIN');
+    }
+  };
+
   const deleteStaffMember = async (staffId: string) => {
     try {
       if (!organizationId) {
@@ -258,12 +287,57 @@ export function ManagerDashboard({
           </div>
           <div className="text-right">
             {organizationName && <p className="text-blue-100 text-sm mb-2">{organizationName}</p>}
-            <button
-              onClick={onBack}
-              className="bg-blue-800 hover:bg-blue-900 px-6 py-2 rounded transition"
-            >
-              ← Back
-            </button>
+            <div className="flex gap-2 justify-end">
+              {showManagerPinReset ? (
+                <>
+                  <input
+                    type="text"
+                    value={managerNewPin}
+                    onChange={(e) => setManagerNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="New PIN"
+                    maxLength={4}
+                    className="w-20 px-2 py-1 rounded text-center font-mono text-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => resetManagerPin()}
+                    className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-sm transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowManagerPinReset(false);
+                      setManagerNewPin('');
+                    }}
+                    className="bg-gray-600 hover:bg-gray-700 px-4 py-1 rounded text-sm transition"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowManagerPinReset(true)}
+                    className="bg-blue-800 hover:bg-blue-900 px-4 py-2 rounded text-sm transition"
+                  >
+                    Reset PIN
+                  </button>
+                  <button
+                    onClick={() => resetManagerPin('0000')}
+                    className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm transition"
+                  >
+                    Reset to 0000
+                  </button>
+                  <button
+                    onClick={onBack}
+                    className="bg-blue-800 hover:bg-blue-900 px-6 py-2 rounded transition"
+                  >
+                    ← Back
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
