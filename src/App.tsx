@@ -44,6 +44,7 @@ function AppContent() {
   const [managerStaffId, setManagerStaffId] = useState<string | null>(null);
   const [staffLoginMode, setStaffLoginMode] = useState(false);
   const [managerOrgId, setManagerOrgId] = useState<string | null>(null);
+  const [managerPin, setManagerPin] = useState<string>('1234');
 
   const handleManagerView = () => {
     if (localProfile) {
@@ -68,12 +69,12 @@ function AppContent() {
   };
 
   useEffect(() => {
-    const checkOrgPinExpiry = async () => {
+    const checkOrgData = async () => {
       if (user && profile?.organization_id) {
         try {
           const { data: org } = await supabase
             .from('organizations')
-            .select('pin_expires_at')
+            .select('pin_expires_at, manager_pin')
             .eq('id', profile.organization_id)
             .single();
 
@@ -82,13 +83,17 @@ function AppContent() {
             const isExpired = expiryDate < new Date();
             setOrgPinExpired(isExpired);
           }
+
+          if (org?.manager_pin) {
+            setManagerPin(org.manager_pin);
+          }
         } catch (error) {
-          console.error('Error checking organization PIN expiry:', error);
+          console.error('Error fetching organization data:', error);
         }
       }
     };
 
-    checkOrgPinExpiry();
+    checkOrgData();
   }, [user, profile]);
 
   if (loading) {
@@ -289,7 +294,7 @@ function AppContent() {
 
         {screen.type === 'manager-pin' && (
           <ManagerPinEntry
-            correctPin={user && profile ? '1234' : localProfile?.pin || ''}
+            correctPin={user && profile ? managerPin : localProfile?.pin || ''}
             onSubmit={user && profile ? handleManagerPinSubmitFromCompany : handleManagerPinSubmit}
             onBack={() => {
               if (user && profile) {
