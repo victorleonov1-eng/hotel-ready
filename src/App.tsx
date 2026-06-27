@@ -12,6 +12,7 @@ import { AdminDashboard } from './ui/AdminDashboard';
 import { AdminPinEntry } from './ui/AdminPinEntry';
 import { ManagerPinEntry } from './ui/ManagerPinEntry';
 import { CompanyDashboard } from './ui/CompanyDashboard';
+import { CompanyLandingPage } from './ui/CompanyLandingPage';
 import { ManagerDashboard } from './ui/ManagerDashboard';
 import { loginOrCreateProfile, recordAttempt } from './state/profiles';
 import { getAllPacks, getPack, getScenario, getScenariosByPack } from './content/registry';
@@ -20,6 +21,8 @@ import type { UserProfile } from './content/types';
 
 type Screen =
   | { type: 'login' }
+  | { type: 'company-landing' }
+  | { type: 'staff-training' }
   | { type: 'practice-selector' }
   | { type: 'list'; packId: string }
   | { type: 'play'; scenarioId: string; packId: string }
@@ -40,6 +43,7 @@ function AppContent() {
   });
   const [managerStaffId, setManagerStaffId] = useState<string | null>(null);
   const [staffLoginMode, setStaffLoginMode] = useState(false);
+  const [managerOrgId, setManagerOrgId] = useState<string | null>(null);
 
   const handleManagerView = () => {
     if (localProfile) {
@@ -52,6 +56,13 @@ function AppContent() {
       // Use PIN as manager ID (unique identifier)
       const managerId = localProfile.pin;
       setManagerStaffId(managerId);
+      setScreen({ type: 'manager-dashboard' });
+    }
+  };
+
+  const handleManagerPinSubmitFromCompany = () => {
+    if (profile?.organization_id) {
+      setManagerOrgId(profile.organization_id);
       setScreen({ type: 'manager-dashboard' });
     }
   };
@@ -124,16 +135,15 @@ function AppContent() {
     }
   }
 
-  // Show Company Dashboard for logged-in organization users
+  // Show Company Landing Page for logged-in organization users
   if (user && profile?.organization_id && !adminPinVerified) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <main className="flex-1">
-          <CompanyDashboard
-            onLogout={handleLogout}
-          />
-        </main>
-      </div>
+      <CompanyLandingPage
+        organizationName={profile.organization_name || 'Hotel'}
+        onStaffTraining={() => setScreen({ type: 'staff-training' })}
+        onManagerDashboard={() => setScreen({ type: 'manager-pin' })}
+        onLogout={handleLogout}
+      />
     );
   }
 
@@ -166,8 +176,8 @@ function AppContent() {
   }
 
   // User is logged in - show staff training interface for now
-  function handleLogin(firstName: string, lastName: string, pin: string, position: string, department: any) {
-    const p = loginOrCreateProfile(firstName, lastName, pin, position, department);
+  function handleLogin(firstName: string, lastName: string, pin: string, department: any) {
+    const p = loginOrCreateProfile(firstName, lastName, pin, '', department);
     if (p) {
       setLocalProfile(p);
       setScreen({ type: 'practice-selector' });
@@ -213,6 +223,15 @@ function AppContent() {
       <Header muted={muted} onMuteToggle={setMuted} onLogout={user ? handleLogout : undefined} />
 
       <main className="flex-1">
+        {screen.type === 'staff-training' && !localProfile && (
+          <WhoAreYou
+            onSubmit={handleLogin}
+            onSignOut={() => {
+              setScreen({ type: 'company-landing' });
+            }}
+          />
+        )}
+
         {screen.type === 'login' && !localProfile && (
           <WhoAreYou
             onSubmit={handleLogin}
@@ -268,21 +287,34 @@ function AppContent() {
           }} />
         )}
 
-        {screen.type === 'manager-pin' && localProfile && (
+        {screen.type === 'manager-pin' && (
           <ManagerPinEntry
-            correctPin={localProfile.pin}
-            onSubmit={handleManagerPinSubmit}
-            onBack={() => setScreen({ type: 'practice-selector' })}
+            correctPin={user && profile ? '1234' : localProfile?.pin || ''}
+            onSubmit={user && profile ? handleManagerPinSubmitFromCompany : handleManagerPinSubmit}
+            onBack={() => {
+              if (user && profile) {
+                setScreen({ type: 'company-landing' });
+              } else {
+                setScreen({ type: 'practice-selector' });
+              }
+            }}
           />
         )}
 
-        {screen.type === 'manager-dashboard' && managerStaffId && localProfile && (
+        {screen.type === 'manager-dashboard' && (managerStaffId || managerOrgId) && (
           <ManagerDashboard
-            managerId={managerStaffId}
-            managerName={`${localProfile.firstName} ${localProfile.lastName}`}
+            managerId={managerStaffId || ''}
+            managerName={localProfile ? `${localProfile.firstName} ${localProfile.lastName}` : 'Manager'}
+            organizationId={managerOrgId}
+            organizationName={profile?.organization_name || 'Organization'}
             onBack={() => {
               setManagerStaffId(null);
-              setScreen({ type: 'practice-selector' });
+              setManagerOrgId(null);
+              if (user && profile) {
+                setScreen({ type: 'company-landing' });
+              } else {
+                setScreen({ type: 'practice-selector' });
+              }
             }}
           />
         )}

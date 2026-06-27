@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Department } from '../content/types';
 
 type LoginProps = {
-  onSubmit: (firstName: string, lastName: string, pin: string, position: string, department: Department) => void;
+  onSubmit: (firstName: string, lastName: string, pin: string, department: Department) => void;
   error?: string;
   onSignOut?: () => void;
 };
@@ -23,14 +23,12 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [pin, setPin] = useState('');
-  const [position, setPosition] = useState('');
   const [department, setDepartment] = useState<Department>('FO');
 
   const loadDemo = () => {
     setFirstName('Demo');
     setLastName('User');
     setPin('1234');
-    setPosition('Receptionist');
     setDepartment('FO');
   };
 
@@ -46,13 +44,12 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
 
     const fName = firstName.trim();
     const lName = lastName.trim();
-    const pos = position.trim();
 
-    if (!fName || !lName || pin.length !== 4 || !pos) {
+    if (!fName || !lName || pin.length !== 4) {
       return;
     }
 
-    onSubmit(fName, lName, pin, pos, department);
+    onSubmit(fName, lName, pin, department);
   };
 
   return (
@@ -107,17 +104,6 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson font-mono text-center text-lg"
           />
           <p className="text-xs text-gray-500 mt-1">Choose your own password — enter it to sign in again</p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-          <input
-            type="text"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
-            placeholder="e.g. Receptionist"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-crimson"
-          />
         </div>
 
         <div>

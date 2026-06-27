@@ -25,10 +25,14 @@ interface Property {
 export function ManagerDashboard({
   managerId,
   managerName,
+  organizationId,
+  organizationName,
   onBack
 }: {
   managerId: string;
   managerName: string;
+  organizationId?: string;
+  organizationName?: string;
   onBack: () => void;
 }) {
   const [teamMembers, setTeamMembers] = useState<StaffMember[]>([]);
@@ -118,17 +122,19 @@ export function ManagerDashboard({
       <div className="bg-blue-700 text-white px-8 py-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">{managerName}</h1>
-            <p className="text-blue-100 mt-1">Manager Dashboard</p>
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+            <p className="text-blue-100 mt-1">Monitor and manage your team's training progress</p>
           </div>
-          <button
-            onClick={onBack}
-            className="bg-blue-800 hover:bg-blue-900 px-6 py-2 rounded transition"
-          >
-            ← Back
-          </button>
+          <div className="text-right">
+            {organizationName && <p className="text-blue-100 text-sm mb-2">{organizationName}</p>}
+            <button
+              onClick={onBack}
+              className="bg-blue-800 hover:bg-blue-900 px-6 py-2 rounded transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
-        <p className="text-blue-100">Monitor and manage your team's training progress</p>
       </div>
 
       {/* Main Content */}
