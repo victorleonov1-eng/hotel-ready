@@ -11,3 +11,7 @@ export const DEPARTMENTS: { value: Department; label: string }[] = [
   { value: 'General Manager', label: 'General Manager' },
   { value: 'Other', label: 'Other' },
 ];
+
+export function getDepartmentLabel(dept: Department): string {
+  return DEPARTMENTS.find(d => d.value === dept)?.label || dept;
+}
