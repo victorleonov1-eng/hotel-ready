@@ -45,6 +45,8 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [activeTab, setActiveTab] = useState<'analytics' | 'properties'>('analytics');
   const [newPropertyName, setNewPropertyName] = useState('');
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
+  const [showManagerPinReset, setShowManagerPinReset] = useState(false);
+  const [newManagerPin, setNewManagerPin] = useState('');
 
   useEffect(() => {
     // Fetch data on component mount (works with or without user login)
@@ -170,6 +172,34 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     } catch (error) {
       console.error('Error deleting property:', error);
       alert('Failed to delete property');
+    }
+  };
+
+  const resetManagerPin = async (pinValue?: string) => {
+    if (!selectedOrgId) return;
+
+    const pinToSet = pinValue || newManagerPin;
+
+    if (pinToSet.length !== 4) {
+      alert('PIN must be 4 digits.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ manager_pin: pinToSet })
+        .eq('id', selectedOrgId);
+
+      if (error) throw error;
+
+      setShowManagerPinReset(false);
+      setNewManagerPin('');
+      fetchAllData();
+      alert(`Manager PIN reset to ${pinToSet}`);
+    } catch (error) {
+      console.error('Error resetting manager PIN:', error);
+      alert('Failed to reset manager PIN');
     }
   };
 
@@ -484,6 +514,60 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
                 <div>
                   <p className="text-lg font-bold text-gray-500">0 days left</p>
                   <p className="text-xs text-gray-500 mt-1">Not set - Set expiration date</p>
+                </div>
+              )}
+            </div>
+
+            {/* Manager PIN Section */}
+            <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm font-bold text-red-600 mb-3">🚨 Manager PIN - Emergency Reset</p>
+              {showManagerPinReset ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newManagerPin}
+                    onChange={(e) => setNewManagerPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="4-digit PIN"
+                    maxLength={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-center font-mono text-sm"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => resetManagerPin()}
+                      disabled={newManagerPin.length !== 4}
+                      className="flex-1 bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700 disabled:opacity-50"
+                    >
+                      Save PIN
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowManagerPinReset(false);
+                        setNewManagerPin('');
+                      }}
+                      className="flex-1 bg-gray-400 text-white px-3 py-2 rounded text-sm hover:bg-gray-500"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-600">Reset the manager's dashboard access PIN</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowManagerPinReset(true)}
+                      className="flex-1 bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700"
+                    >
+                      Set Custom
+                    </button>
+                    <button
+                      onClick={() => resetManagerPin('0000')}
+                      className="flex-1 bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700"
+                    >
+                      Reset to 0000
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
