@@ -104,6 +104,14 @@ export function ManagerDashboard({
     }
 
     try {
+      console.log('Adding staff with:', {
+        organization_id: organizationId,
+        name: newStaffName.trim(),
+        department: newStaffDepartment,
+        position: newStaffPosition.trim(),
+        pin: newStaffPin,
+      });
+
       const { error } = await supabase
         .from('staff_members')
         .insert({
@@ -115,8 +123,13 @@ export function ManagerDashboard({
         });
 
       if (error) {
-        console.error('Supabase error details:', error);
-        throw error;
+        console.error('Supabase error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw new Error(error.message || error.code || 'Unknown error');
       }
 
       setNewStaffName('');
