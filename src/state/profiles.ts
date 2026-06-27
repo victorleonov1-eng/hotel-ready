@@ -30,17 +30,26 @@ export function loginOrCreateProfile(
   position: string,
   department: Department
 ): UserProfile | null {
+  console.log('[PROFILE] loginOrCreateProfile called:', { firstName, lastName, pin, department });
   const profiles = loadProfiles();
+  console.log('[PROFILE] Loaded profiles:', profiles);
   const fNorm = firstName.trim().toLowerCase();
   const lNorm = lastName.trim().toLowerCase();
+  console.log('[PROFILE] Looking for:', { fNorm, lNorm });
 
   let profile = profiles.find((p) => p.firstName.toLowerCase() === fNorm && p.lastName.toLowerCase() === lNorm);
+  console.log('[PROFILE] Found existing profile:', profile);
 
   if (profile) {
     // Existing profile — PIN must match
-    if (profile.pin !== pin) return null;
+    console.log('[PROFILE] Checking PIN:', { stored: profile.pin, provided: pin, match: profile.pin === pin });
+    if (profile.pin !== pin) {
+      console.log('[PROFILE] PIN mismatch, returning null');
+      return null;
+    }
   } else {
     // New profile
+    console.log('[PROFILE] Creating new profile');
     profile = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -51,9 +60,12 @@ export function loginOrCreateProfile(
       bestByScenario: {},
       bestTimeByScenario: {},
     };
+    console.log('[PROFILE] New profile created:', profile);
     profiles.push(profile);
   }
+  console.log('[PROFILE] Saving profiles...');
   saveProfiles(profiles);
+  console.log('[PROFILE] Returning profile:', profile);
   return profile;
 }
 

@@ -187,20 +187,26 @@ function AppContent() {
   }
 
   // User is logged in - show staff training interface for now
-  async function handleLogin(firstName: string, lastName: string, pin: string, department: any) {
+  function handleLogin(firstName: string, lastName: string, pin: string, department: any) {
+    console.log('[LOGIN] Starting login for:', firstName, lastName, 'Department:', department);
     try {
-      // For local testing, create profile directly without Supabase lookup
-      // In production, you'd want to verify against staff_members table
+      console.log('[LOGIN] Calling loginOrCreateProfile...');
       const p = loginOrCreateProfile(firstName, lastName, pin, '', department);
+      console.log('[LOGIN] loginOrCreateProfile returned:', p);
+
       if (p) {
+        console.log('[LOGIN] Setting local profile...');
         setLocalProfile(p);
+        console.log('[LOGIN] Profile set, changing screen to practice-selector...');
         setScreen({ type: 'practice-selector' });
+        console.log('[LOGIN] ✅ Login complete');
       } else {
+        console.warn('[LOGIN] loginOrCreateProfile returned null');
         alert('Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      alert('An error occurred during login. Please try again.');
+      console.error('[LOGIN] Exception:', error);
+      alert('An error occurred: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
