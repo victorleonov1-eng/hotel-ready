@@ -12,7 +12,7 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [pin, setPin] = useState('');
-  const [department, setDepartment] = useState<Department>('FO');
+  const [department, setDepartment] = useState<Department>('Front Office');
 
 
   const handleSubmit = (e: React.FormEvent) => {
