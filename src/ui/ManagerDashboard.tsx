@@ -167,10 +167,19 @@ export function ManagerDashboard({
 
   const deleteStaffMember = async (staffId: string) => {
     try {
-      const { error } = await supabase
+      if (!organizationId) {
+        alert('Error: Organization ID not found');
+        return;
+      }
+
+      const { data, error } = await supabase
         .from('staff_members')
         .delete()
-        .eq('id', staffId);
+        .eq('id', staffId)
+        .eq('organization_id', organizationId)
+        .select();
+
+      console.log('Delete response:', { data, error });
 
       if (error) {
         console.error('Supabase delete error:', {
@@ -181,6 +190,8 @@ export function ManagerDashboard({
         });
         throw error;
       }
+
+      console.log('Deleted rows:', data?.length);
 
       setDeleteConfirmId(null);
       fetchData();
