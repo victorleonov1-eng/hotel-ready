@@ -518,6 +518,13 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
               )}
             </div>
 
+            {/* Current Manager PIN Display */}
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm font-bold text-blue-600 mb-2">Current Manager PIN</p>
+              <p className="text-2xl font-mono font-bold text-blue-700">{selectedOrg.manager_pin || 'Not set'}</p>
+              <p className="text-xs text-gray-600 mt-1">This PIN is unique to this organization</p>
+            </div>
+
             {/* Manager PIN Section */}
             <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
               <p className="text-sm font-bold text-red-600 mb-3">🚨 Manager PIN - Emergency Reset</p>
