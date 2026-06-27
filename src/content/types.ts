@@ -69,7 +69,7 @@ export type Attempt = {
   recordingId?: string;
 };
 
-export type Department = "FO" | "F&B" | "HK" | "FIN" | "KITCHEN" | "TECH" | "MANAGER" | "GM" | "OTHER";
+export type Department = "Front Office" | "Food & Beverage" | "Housekeeping" | "Finance" | "Kitchen" | "Technical / Maintenance" | "Manager" | "General Manager" | "Other";
 
 export type UserProfile = {
   firstName: string;

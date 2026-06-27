@@ -1,17 +1,13 @@
 import type { Department } from '../content/types';
 
 export const DEPARTMENTS: { value: Department; label: string }[] = [
-  { value: 'FO', label: 'Front Office' },
-  { value: 'F&B', label: 'Food & Beverage' },
-  { value: 'HK', label: 'Housekeeping' },
-  { value: 'FIN', label: 'Finance' },
-  { value: 'KITCHEN', label: 'Kitchen' },
-  { value: 'TECH', label: 'Technical / Maintenance' },
-  { value: 'MANAGER', label: 'Manager' },
-  { value: 'GM', label: 'General Manager' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'Front Office', label: 'Front Office' },
+  { value: 'Food & Beverage', label: 'Food & Beverage' },
+  { value: 'Housekeeping', label: 'Housekeeping' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Kitchen', label: 'Kitchen' },
+  { value: 'Technical / Maintenance', label: 'Technical / Maintenance' },
+  { value: 'Manager', label: 'Manager' },
+  { value: 'General Manager', label: 'General Manager' },
+  { value: 'Other', label: 'Other' },
 ];
-
-export function getDepartmentLabel(code: Department): string {
-  return DEPARTMENTS.find(d => d.value === code)?.label || code;
-}
