@@ -172,6 +172,16 @@ export function ManagerDashboard({
         return;
       }
 
+      // First, check what organization_id the staff member has
+      const { data: staffData } = await supabase
+        .from('staff_members')
+        .select('organization_id')
+        .eq('id', staffId)
+        .single();
+
+      console.log('Staff member org_id:', staffData?.organization_id);
+      console.log('Current org_id:', organizationId);
+
       const { data, error } = await supabase
         .from('staff_members')
         .delete()
@@ -191,7 +201,12 @@ export function ManagerDashboard({
         throw error;
       }
 
-      console.log('Deleted rows:', data?.length);
+      if (!data || data.length === 0) {
+        alert('Could not delete staff member. Organization ID mismatch or no permission.');
+        return;
+      }
+
+      console.log('Deleted rows:', data.length);
 
       setDeleteConfirmId(null);
       fetchData();
