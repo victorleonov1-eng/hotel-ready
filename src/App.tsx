@@ -318,6 +318,7 @@ function AppContent() {
             managerName={localProfile ? `${localProfile.firstName} ${localProfile.lastName}` : 'Manager'}
             organizationId={managerOrgId}
             organizationName={organizationName}
+            userId={user?.id}
             onBack={() => {
               setManagerStaffId(null);
               setManagerOrgId(null);

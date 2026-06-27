@@ -35,12 +35,14 @@ export function ManagerDashboard({
   managerName,
   organizationId,
   organizationName,
+  userId,
   onBack
 }: {
   managerId: string;
   managerName: string;
   organizationId?: string;
   organizationName?: string;
+  userId?: string;
   onBack: () => void;
 }) {
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
@@ -118,6 +120,7 @@ export function ManagerDashboard({
       const { error } = await supabase
         .from('staff_members')
         .insert({
+          user_id: userId,
           organization_id: organizationId,
           name: fullName,
           department: newStaffDepartment,
