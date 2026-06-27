@@ -31,11 +31,29 @@ interface UserProfile {
   full_name: string;
 }
 
+interface StaffMember {
+  id: string;
+  name: string;
+  organization_id: string;
+  department?: string;
+  created_at: string;
+}
+
+interface StaffResult {
+  staffId: string;
+  staffName: string;
+  sessionCount: number;
+  avgScore: number;
+  highestScore: number;
+  lowestScore: number;
+}
+
 export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const { user } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [userProfiles, setUserProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -47,6 +65,7 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
   const [showManagerPinReset, setShowManagerPinReset] = useState(false);
   const [newManagerPin, setNewManagerPin] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch data on component mount (works with or without user login)
@@ -81,14 +100,20 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
 
         setProperties(props || []);
 
-        if (props && props.length > 0) {
-          const { data: sess } = await supabase
-            .from('sessions')
-            .select('*')
-            .in('staff_id', orgs.map(o => o.id));
+        // Fetch staff members for all organizations
+        const { data: staff } = await supabase
+          .from('staff_members')
+          .select('*')
+          .in('organization_id', orgs.map(o => o.id));
 
-          setSessions(sess || []);
-        }
+        setStaffMembers(staff || []);
+
+        // Fetch all sessions
+        const { data: sess } = await supabase
+          .from('sessions')
+          .select('*');
+
+        setSessions(sess || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -212,16 +237,235 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     return days;
   };
 
+  const getDepartmentsForOrg = (orgId: string): string[] => {
+    const orgStaff = staffMembers.filter(s => s.organization_id === orgId);
+    const departments = new Set(orgStaff.map(s => s.department || 'Unassigned').filter(Boolean));
+    return Array.from(departments).sort();
+  };
+
+  const getStaffResultsForOrg = (orgId: string, departmentFilter?: string | null): StaffResult[] => {
+    let orgStaff = staffMembers.filter(s => s.organization_id === orgId);
+
+    if (departmentFilter) {
+      orgStaff = orgStaff.filter(s => (s.department || 'Unassigned') === departmentFilter);
+    }
+
+    return orgStaff.map(staff => {
+      const staffSessions = sessions.filter(s => s.staff_id === staff.id);
+      const scores = staffSessions.map(s => s.score || 0);
+
+      return {
+        staffId: staff.id,
+        staffName: staff.name,
+        sessionCount: staffSessions.length,
+        avgScore: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        highestScore: scores.length > 0 ? Math.max(...scores) : 0,
+        lowestScore: scores.length > 0 ? Math.min(...scores) : 0,
+      };
+    }).sort((a, b) => b.avgScore - a.avgScore);
+  };
+
+  const handlePrintReport = () => {
+    if (!selectedOrgId) return;
+
+    const org = organizations.find(o => o.id === selectedOrgId);
+    const staffResults = getStaffResultsForOrg(selectedOrgId, selectedDepartment);
+    const analytics = getAnalyticsForOrg(selectedOrgId);
+    const deptText = selectedDepartment ? ` - ${selectedDepartment}` : '';
+
+    const printContent = `
+      <html>
+        <head>
+          <title>${org?.name} - Staff Performance Report${deptText}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 3px solid #b91c1c;
+              padding-bottom: 20px;
+            }
+            .title {
+              font-size: 28px;
+              font-weight: bold;
+              color: #1f2937;
+              margin: 0;
+            }
+            .subtitle {
+              font-size: 14px;
+              color: #666;
+              margin: 5px 0;
+            }
+            .timestamp {
+              font-size: 12px;
+              color: #999;
+              margin-top: 10px;
+            }
+            .metrics-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 20px;
+              margin-bottom: 30px;
+            }
+            .metric-card {
+              border: 1px solid #ddd;
+              padding: 15px;
+              border-radius: 8px;
+              background-color: #f9f9f9;
+            }
+            .metric-label {
+              font-size: 11px;
+              font-weight: bold;
+              color: #666;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+            }
+            .metric-value {
+              font-size: 32px;
+              font-weight: bold;
+              color: #1f2937;
+            }
+            .metric-desc {
+              font-size: 12px;
+              color: #999;
+              margin-top: 5px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th {
+              background-color: #f3f4f6;
+              padding: 12px;
+              text-align: left;
+              font-weight: bold;
+              border-bottom: 2px solid #d1d5db;
+              font-size: 12px;
+              text-transform: uppercase;
+              color: #374151;
+            }
+            td {
+              padding: 12px;
+              border-bottom: 1px solid #e5e7eb;
+              font-size: 13px;
+            }
+            tr:nth-child(even) {
+              background-color: #f9fafb;
+            }
+            .excellent { color: #059669; font-weight: bold; }
+            .good { color: #d97706; font-weight: bold; }
+            .needs-work { color: #dc2626; font-weight: bold; }
+            .section-title {
+              font-size: 18px;
+              font-weight: bold;
+              color: #1f2937;
+              margin-top: 30px;
+              margin-bottom: 15px;
+              border-left: 4px solid #b91c1c;
+              padding-left: 10px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <p class="title">HOTEL Ready - Staff Performance Report</p>
+            <p class="subtitle">Organization: ${org?.name}</p>
+            ${selectedDepartment ? `<p class="subtitle">Department: ${selectedDepartment}</p>` : ''}
+            <p class="timestamp">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">👥 Staff Trained</div>
+              <div class="metric-value">${analytics.totalStaffTrained}</div>
+              <div class="metric-desc">Active learners</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">✓ Sessions</div>
+              <div class="metric-value">${analytics.totalSessions}</div>
+              <div class="metric-desc">Completed</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">⭐ Avg Score</div>
+              <div class="metric-value">${analytics.avgScore}%</div>
+              <div class="metric-desc">Overall performance</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">📈 Completion</div>
+              <div class="metric-value">${analytics.completionRate}%</div>
+              <div class="metric-desc">Progress rate</div>
+            </div>
+          </div>
+
+          <div class="section-title">Staff Performance Details</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Sessions</th>
+                <th>Avg Score</th>
+                <th>Highest</th>
+                <th>Lowest</th>
+                <th>Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${staffResults.length > 0 ? staffResults.map(staff => `
+                <tr>
+                  <td>${staff.staffName}</td>
+                  <td>${staff.sessionCount}</td>
+                  <td><strong>${staff.avgScore}%</strong></td>
+                  <td>${staff.highestScore}%</td>
+                  <td>${staff.lowestScore}%</td>
+                  <td>
+                    ${staff.avgScore >= 85 ? '<span class="excellent">🟢 Excellent</span>' :
+                      staff.avgScore >= 70 ? '<span class="good">🟡 Good</span>' :
+                      '<span class="needs-work">🔴 Needs Work</span>'}
+                  </td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" style="text-align: center; color: #999;">No staff data available</td></tr>'}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '', 'height=800,width=1000');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 250);
+    }
+  };
+
   const getAnalyticsForOrg = (orgId: string) => {
-    const orgProperties = properties.filter(p => p.organization_id === orgId);
-    const orgSessions = sessions.filter(s => orgProperties.some(p => p.id === s.staff_id));
+    const orgStaff = staffMembers.filter(s => s.organization_id === orgId);
+    const staffIds = orgStaff.map(s => s.id);
+    const orgSessions = sessions.filter(s => staffIds.includes(s.staff_id));
+
+    const uniqueStaff = new Set(orgSessions.map(s => s.staff_id)).size;
+    const totalScenariosCompleted = orgSessions.length;
+    const completionRate = orgStaff.length > 0 ? Math.round((totalScenariosCompleted / (orgStaff.length * 5 || 1)) * 100) : 0;
 
     return {
-      totalLocations: orgProperties.length,
+      totalLocations: orgStaff.length,
+      totalStaffTrained: uniqueStaff,
       totalSessions: orgSessions.length,
       avgScore: orgSessions.length > 0
         ? Math.round(orgSessions.reduce((sum, s) => sum + (s.score || 0), 0) / orgSessions.length)
         : 0,
+      completionRate: completionRate,
       highScores: orgSessions.filter(s => (s.score || 0) >= 85).length,
       mediumScores: orgSessions.filter(s => (s.score || 0) >= 70 && (s.score || 0) < 85).length,
       lowScores: orgSessions.filter(s => (s.score || 0) < 70).length,
@@ -294,185 +538,266 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* CENTER SECTION WITH TABS */}
-        <div className="flex-1 p-8 overflow-y-auto flex flex-col">
+        {/* CENTER SECTION - PROFESSIONAL ANALYTICS DASHBOARD */}
+        <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100">
           {selectedOrg ? (
-            <>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{selectedOrg.name}</h1>
-
-              {/* Tab Buttons */}
-              <div className="flex gap-4 mb-8 border-b border-gray-200">
-                <button
-                  onClick={() => setActiveTab('analytics')}
-                  className={`px-4 py-2 font-semibold transition ${
-                    activeTab === 'analytics'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  📊 Analytics
-                </button>
-                <button
-                  onClick={() => setActiveTab('properties')}
-                  className={`px-4 py-2 font-semibold transition ${
-                    activeTab === 'properties'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  📍 Properties
-                </button>
+            <div className="p-10">
+              {/* Header */}
+              <div className="mb-10">
+                <h1 className="text-5xl font-bold text-slate-900">{selectedOrg.name}</h1>
+                <p className="text-slate-600 text-lg mt-2">Training Analytics & Performance Dashboard</p>
               </div>
 
-              {/* ANALYTICS TAB */}
-              {activeTab === 'analytics' && selectedAnalytics && (
+              {/* PROFESSIONAL ANALYTICS */}
+              {selectedAnalytics && (
                 <>
-                  <p className="text-gray-600 mb-8">Organization Analytics Dashboard</p>
-
-                  {/* Metrics Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-                  <p className="text-gray-600 text-sm">Total Locations</p>
-                  <p className="text-3xl font-bold text-blue-600 mt-2">{selectedAnalytics.totalLocations}</p>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-                  <p className="text-gray-600 text-sm">Training Sessions</p>
-                  <p className="text-3xl font-bold text-purple-600 mt-2">{selectedAnalytics.totalSessions}</p>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                  <p className="text-gray-600 text-sm">Average Score</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">{selectedAnalytics.avgScore}%</p>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-                  <p className="text-gray-600 text-sm">Completion Rate</p>
-                  <p className="text-3xl font-bold text-orange-600 mt-2">
-                    {selectedAnalytics.totalSessions > 0 ? Math.round((selectedAnalytics.totalSessions / (selectedAnalytics.totalLocations * 5 || 1)) * 100) : 0}%
-                  </p>
-                </div>
-              </div>
-
-              {/* Score Distribution */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Score Distribution</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">High Scores (85+)</span>
-                      <span className="text-sm font-bold text-green-600">{selectedAnalytics.highScores}</span>
+                  {/* KPI Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    {/* Staff Trained KPI */}
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border-t-4 border-blue-500">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-3xl">👥</span>
+                        <p className="text-slate-600 text-xs font-semibold uppercase tracking-wide">Staff Trained</p>
+                      </div>
+                      <p className="text-5xl font-bold text-slate-900 mb-2">{selectedAnalytics.totalStaffTrained}</p>
+                      <p className="text-slate-500 text-sm">Active learners in training program</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-green-600 h-2 rounded-full"
-                        style={{
-                          width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.highScores / selectedAnalytics.totalSessions * 100) : 0}%`
-                        }}
-                      />
+
+                    {/* Sessions Completed KPI */}
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border-t-4 border-purple-500">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-3xl">✓</span>
+                        <p className="text-slate-600 text-xs font-semibold uppercase tracking-wide">Sessions</p>
+                      </div>
+                      <p className="text-5xl font-bold text-slate-900 mb-2">{selectedAnalytics.totalSessions}</p>
+                      <p className="text-slate-500 text-sm">Training scenarios completed</p>
+                    </div>
+
+                    {/* Average Score KPI */}
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border-t-4 border-emerald-500">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-3xl">⭐</span>
+                        <p className="text-slate-600 text-xs font-semibold uppercase tracking-wide">Avg Score</p>
+                      </div>
+                      <p className="text-5xl font-bold text-slate-900 mb-2">{selectedAnalytics.avgScore}<span className="text-2xl ml-1">%</span></p>
+                      <p className="text-slate-500 text-sm">Overall performance quality</p>
+                    </div>
+
+                    {/* Completion Rate KPI */}
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border-t-4 border-amber-500">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-3xl">📈</span>
+                        <p className="text-slate-600 text-xs font-semibold uppercase tracking-wide">Completion</p>
+                      </div>
+                      <p className="text-5xl font-bold text-slate-900 mb-2">{selectedAnalytics.completionRate}<span className="text-2xl ml-1">%</span></p>
+                      <p className="text-slate-500 text-sm">Program progress & engagement</p>
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">Medium Scores (70-84)</span>
-                      <span className="text-sm font-bold text-orange-600">{selectedAnalytics.mediumScores}</span>
+                  {/* Performance Analysis Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-2">
+                    {/* Performance Distribution */}
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                      <h3 className="text-xl font-bold text-slate-900 mb-8">Performance Distribution</h3>
+
+                      {/* High Performers */}
+                      <div className="mb-8 pb-8 border-b border-slate-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">🟢</span>
+                            <div>
+                              <p className="font-semibold text-slate-900">High Performers</p>
+                              <p className="text-sm text-slate-600">Scores 85+</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-emerald-600">{selectedAnalytics.highScores}</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                          <div className="bg-emerald-500 h-3 rounded-full transition-all duration-500"
+                            style={{ width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.highScores / selectedAnalytics.totalSessions * 100) : 0}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Medium Performers */}
+                      <div className="mb-8 pb-8 border-b border-slate-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">🟡</span>
+                            <div>
+                              <p className="font-semibold text-slate-900">Average Performers</p>
+                              <p className="text-sm text-slate-600">Scores 70-84</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-amber-600">{selectedAnalytics.mediumScores}</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                          <div className="bg-amber-500 h-3 rounded-full transition-all duration-500"
+                            style={{ width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.mediumScores / selectedAnalytics.totalSessions * 100) : 0}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Needs Improvement */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">🔴</span>
+                            <div>
+                              <p className="font-semibold text-slate-900">Needs Improvement</p>
+                              <p className="text-sm text-slate-600">Below 70</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-red-600">{selectedAnalytics.lowScores}</p>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                          <div className="bg-red-500 h-3 rounded-full transition-all duration-500"
+                            style={{ width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.lowScores / selectedAnalytics.totalSessions * 100) : 0}%` }} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-orange-600 h-2 rounded-full"
-                        style={{
-                          width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.mediumScores / selectedAnalytics.totalSessions * 100) : 0}%`
-                        }}
-                      />
+
+                    {/* Quick Stats */}
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                      <h3 className="text-xl font-bold text-slate-900 mb-8">Key Insights</h3>
+
+                      <div className="space-y-6">
+                        <div className="flex gap-4 pb-6 border-b border-slate-200">
+                          <span className="text-4xl">📊</span>
+                          <div className="flex-1">
+                            <p className="text-sm text-slate-600 uppercase font-semibold tracking-wide">Avg Per Staff</p>
+                            <p className="text-3xl font-bold text-slate-900 mt-2">
+                              {selectedAnalytics.totalStaffTrained > 0 ? (selectedAnalytics.totalSessions / selectedAnalytics.totalStaffTrained).toFixed(1) : 0}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">sessions per person</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4 pb-6 border-b border-slate-200">
+                          <span className="text-4xl">🏆</span>
+                          <div className="flex-1">
+                            <p className="text-sm text-slate-600 uppercase font-semibold tracking-wide">Excellence Rate</p>
+                            <p className="text-3xl font-bold text-emerald-600 mt-2">
+                              {selectedAnalytics.totalSessions > 0 ? Math.round((selectedAnalytics.highScores / selectedAnalytics.totalSessions * 100)) : 0}%
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">high performers</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                          <span className="text-4xl">📍</span>
+                          <div className="flex-1">
+                            <p className="text-sm text-slate-600 uppercase font-semibold tracking-wide">Locations</p>
+                            <p className="text-3xl font-bold text-slate-900 mt-2">{selectedAnalytics.totalLocations}</p>
+                            <p className="text-xs text-slate-500 mt-1">active sites</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">Low Scores (&lt;70)</span>
-                      <span className="text-sm font-bold text-red-600">{selectedAnalytics.lowScores}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-red-600 h-2 rounded-full"
-                        style={{
-                          width: `${selectedAnalytics.totalSessions > 0 ? (selectedAnalytics.lowScores / selectedAnalytics.totalSessions * 100) : 0}%`
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-                </>
-              )}
-
-              {/* PROPERTIES TAB */}
-              {activeTab === 'properties' && (
-                <>
-                  <p className="text-gray-600 mb-8">Manage locations for this organization</p>
-
-                  {/* Add Property Form */}
-                  <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Add New Location</h3>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newPropertyName}
-                        onChange={(e) => setNewPropertyName(e.target.value)}
-                        placeholder="e.g., Main Hotel, Restaurant, Front Desk"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        onKeyPress={(e) => e.key === 'Enter' && addProperty()}
-                      />
+                  {/* Staff Performance Section */}
+                  <div className="mt-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-2xl font-bold text-slate-900">Staff Performance Details</h3>
                       <button
-                        onClick={addProperty}
-                        disabled={!newPropertyName.trim()}
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 transition"
+                        onClick={handlePrintReport}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white font-semibold rounded-lg hover:bg-red-800 transition"
                       >
-                        ➕ Add
+                        🖨️ Print Report
                       </button>
                     </div>
-                  </div>
 
-                  {/* Properties List */}
-                  <div className="bg-white rounded-lg shadow overflow-hidden">
-                    {properties.filter(p => p.organization_id === selectedOrgId).length > 0 ? (
-                      <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Location Name</th>
-                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
-                            <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {properties.filter(p => p.organization_id === selectedOrgId).map((prop) => (
-                            <tr key={prop.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 text-gray-900">{prop.name}</td>
-                              <td className="px-6 py-4 text-gray-600 text-sm">
-                                {new Date(prop.created_at).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <button
-                                  onClick={() => deleteProperty(prop.id)}
-                                  className="text-red-600 hover:text-red-700 font-semibold text-sm"
-                                >
-                                  🗑️ Delete
-                                </button>
-                              </td>
+                    {/* Department Filter */}
+                    <div className="mb-6 flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold text-slate-600">Filter by Department:</span>
+                      <button
+                        onClick={() => setSelectedDepartment(null)}
+                        className={`px-4 py-2 rounded-lg transition font-medium ${
+                          selectedDepartment === null
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                        }`}
+                      >
+                        All Departments
+                      </button>
+                      {getDepartmentsForOrg(selectedOrgId!).map(dept => (
+                        <button
+                          key={dept}
+                          onClick={() => setSelectedDepartment(dept)}
+                          className={`px-4 py-2 rounded-lg transition font-medium ${
+                            selectedDepartment === dept
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                          }`}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                              <th className="px-6 py-4 text-left text-sm font-bold text-slate-900">Staff Name</th>
+                              <th className="px-6 py-4 text-center text-sm font-bold text-slate-900">Sessions</th>
+                              <th className="px-6 py-4 text-center text-sm font-bold text-slate-900">Avg Score</th>
+                              <th className="px-6 py-4 text-center text-sm font-bold text-slate-900">Highest</th>
+                              <th className="px-6 py-4 text-center text-sm font-bold text-slate-900">Lowest</th>
+                              <th className="px-6 py-4 text-center text-sm font-bold text-slate-900">Performance</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="p-8 text-center text-gray-600">
-                        <p>No properties added yet. Create your first location above!</p>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200">
+                            {getStaffResultsForOrg(selectedOrgId!, selectedDepartment).length > 0 ? (
+                              getStaffResultsForOrg(selectedOrgId!, selectedDepartment).map((staff) => (
+                                <tr key={staff.staffId} className="hover:bg-slate-50 transition">
+                                  <td className="px-6 py-4 font-semibold text-slate-900">{staff.staffName}</td>
+                                  <td className="px-6 py-4 text-center text-slate-700">{staff.sessionCount}</td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="font-bold text-lg">
+                                      {staff.avgScore}%
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="text-emerald-600 font-semibold">{staff.highestScore}%</span>
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="text-red-600 font-semibold">{staff.lowestScore}%</span>
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                                      staff.avgScore >= 85 ? 'bg-emerald-100 text-emerald-700' :
+                                      staff.avgScore >= 70 ? 'bg-amber-100 text-amber-700' :
+                                      'bg-red-100 text-red-700'
+                                    }`}>
+                                      {staff.avgScore >= 85 ? '🟢 Excellent' :
+                                       staff.avgScore >= 70 ? '🟡 Good' :
+                                       '🔴 Needs Work'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={6} className="px-6 py-8 text-center text-slate-600">
+                                  No staff members or training data available for this organization
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </>
               )}
-            </>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

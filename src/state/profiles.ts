@@ -117,12 +117,12 @@ async function syncAttemptToSupabase(
   try {
     console.log('[SYNC] Starting attempt sync for:', `${firstName} ${lastName}`, 'Scenario:', scenarioId, 'Score:', score);
 
-    // Look up staff member by name to get their ID
+    // Look up staff member by name to get their ID (case-insensitive)
     console.log('[SYNC] Looking up staff member:', `${firstName} ${lastName}`);
     const { data: staffMember, error: lookupError } = await supabase
       .from('staff_members')
       .select('id')
-      .eq('name', `${firstName} ${lastName}`)
+      .ilike('name', `${firstName} ${lastName}`)
       .single();
 
     console.log('[SYNC] Lookup result:', { data: staffMember, error: lookupError });

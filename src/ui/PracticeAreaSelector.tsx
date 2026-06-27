@@ -13,13 +13,13 @@ export function PracticeAreaSelector({ packs, profile, onSelect, onLogout, onMan
 
   const matchesDepartment = (packDept: string): boolean => {
     if (isManagerOrGM) return true;
-    // Map pack departments to user department codes
+    // Map pack department names to user profile department names
     const packDeptMap: Record<string, string> = {
-      'Front Desk / Reception': 'FO',
-      'Food & Beverage Service': 'F&B',
-      'Housekeeping': 'HK',
-      'Room Service': 'RS',
-      'Concierge': 'CONCIERGE'
+      'Front Desk / Reception': 'Front Office',
+      'Food & Beverage Service': 'Food & Beverage',
+      'Housekeeping': 'Housekeeping',
+      'Room Service': 'Room Service',
+      'Concierge': 'Concierge'
     };
     return packDeptMap[packDept] === profile.department;
   };

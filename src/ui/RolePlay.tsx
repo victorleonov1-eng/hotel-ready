@@ -36,6 +36,8 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState<AnswerOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
+  const [stuckCardsUsed, setStuckCardsUsed] = useState(0);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [voices, setVoices] = useState<Voice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('EXAVITQu4vr4xnSDxMaL'); // Bella
   const [useTTS, setUseTTS] = useState(() => {
@@ -177,6 +179,14 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
 
   async function getAnswerOptions() {
     if (messages.length === 0) return;
+
+    // Check if max cards (2) have been used
+    if (stuckCardsUsed >= 2) {
+      setFeedbackMessage('You\'ve used all your hints! Use your knowledge to answer.');
+      setTimeout(() => setFeedbackMessage(''), 3000);
+      return;
+    }
+
     setOptionsLoading(true);
     const transcript = messages
       .map((m) => `${m.role === 'staff' ? 'STAFF' : 'GUEST'}: ${m.text}`)
@@ -192,6 +202,17 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       setOptions(Array.isArray(data) ? data : data.options || []);
       setShowOptions(true);
       setUsedCards(true);
+
+      // Increment stuck cards and show feedback
+      const newCount = stuckCardsUsed + 1;
+      setStuckCardsUsed(newCount);
+      const remaining = 2 - newCount;
+      if (remaining > 0) {
+        setFeedbackMessage(`Great! You used your knowledge. ${remaining} hint${remaining === 1 ? '' : 's'} remaining.`);
+      } else {
+        setFeedbackMessage('Last hint used! Try to answer on your own next time.');
+      }
+      setTimeout(() => setFeedbackMessage(''), 3000);
     } catch (err) {
       console.error('Error fetching options:', err);
     }
@@ -279,7 +300,17 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
         body: JSON.stringify({ scenario, transcript }),
       });
       const result: ScoreResult = await res.json();
-      setScoreResult(result);
+
+      // Apply scoring penalty based on stuck cards used
+      let finalScore = result.overall;
+      if (stuckCardsUsed > 0) {
+        // -5% per card used (1 card = 95%, 2 cards = 90%)
+        const penalty = stuckCardsUsed * 5;
+        finalScore = Math.max(0, result.overall - penalty);
+      }
+
+      const resultWithPenalty = { ...result, overall: finalScore };
+      setScoreResult(resultWithPenalty);
 
       // Save recording if audio was captured
       let recordingId = '';
@@ -290,16 +321,16 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
           attemptId,
           scenarioId: scenario.id,
           messages,
-          score: result.overall,
+          score: finalScore,
           seconds,
-          usedCards,
+          usedCards: stuckCardsUsed > 0,
           recordedAt: new Date().toISOString(),
           audioData: Object.keys(audioData).length > 0 ? audioData : undefined,
         };
         saveRecording(recording);
       }
 
-      onDone(result.overall, seconds, usedCards, recordingId);
+      onDone(finalScore, seconds, stuckCardsUsed > 0, recordingId);
     } catch {
       setScoreResult(null);
     }
@@ -322,6 +353,8 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
           setStarted(false);
           setSeconds(0);
           setUsedCards(false);
+          setStuckCardsUsed(0);
+          setFeedbackMessage('');
         }}
         onBack={onBack}
       />
@@ -518,18 +551,36 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
                   </button>
                 </div>
 
+                {feedbackMessage && (
+                  <div className="mb-2 p-2 bg-green-100 text-green-700 rounded text-xs font-medium text-center animate-pulse">
+                    {feedbackMessage}
+                  </div>
+                )}
+
+                <div className="mb-2 text-xs text-gray-600 text-center">
+                  Responses: {messages.filter((m) => m.role === 'staff').length}/3
+                </div>
+
                 <div className="flex gap-2 mb-2">
                   <button
                     onClick={getAnswerOptions}
-                    disabled={optionsLoading || messages.length === 0}
-                    className="flex-1 text-sm px-3 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 disabled:opacity-50"
+                    disabled={optionsLoading || messages.length === 0 || stuckCardsUsed >= 2}
+                    className={`flex-1 text-sm px-3 py-2 rounded-lg font-medium transition ${
+                      stuckCardsUsed >= 2
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    } ${optionsLoading ? 'opacity-50' : ''}`}
                   >
-                    {optionsLoading ? 'Loading...' : '💡 Stuck? See options'}
+                    {optionsLoading ? 'Loading...' : `💡 Stuck? (${2 - stuckCardsUsed} left)`}
                   </button>
                   <button
                     onClick={endAndScore}
-                    disabled={messages.filter((m) => m.role === 'staff').length === 0}
-                    className="flex-1 text-sm text-crimson font-medium py-2 disabled:opacity-30"
+                    disabled={messages.filter((m) => m.role === 'staff').length < 3}
+                    className={`flex-1 text-sm font-medium py-2 rounded-lg transition ${
+                      messages.filter((m) => m.role === 'staff').length < 3
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-crimson text-white hover:bg-crimson-dark'
+                    }`}
                   >
                     End & Score
                   </button>
