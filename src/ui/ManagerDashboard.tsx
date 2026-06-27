@@ -47,7 +47,8 @@ export function ManagerDashboard({
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [newStaffName, setNewStaffName] = useState('');
+  const [newStaffFirstName, setNewStaffFirstName] = useState('');
+  const [newStaffLastName, setNewStaffLastName] = useState('');
   const [newStaffDepartment, setNewStaffDepartment] = useState('Front Office');
   const [newStaffPosition, setNewStaffPosition] = useState('');
   const [newStaffPin, setNewStaffPin] = useState('');
@@ -93,7 +94,7 @@ export function ManagerDashboard({
   };
 
   const addStaffMember = async () => {
-    if (!newStaffName.trim() || !newStaffDepartment || !newStaffPosition.trim() || newStaffPin.length !== 4) {
+    if (!newStaffFirstName.trim() || !newStaffLastName.trim() || !newStaffDepartment || !newStaffPosition.trim() || newStaffPin.length !== 4) {
       alert('Please fill all fields. PIN must be 4 digits.');
       return;
     }
@@ -104,9 +105,11 @@ export function ManagerDashboard({
     }
 
     try {
+      const fullName = `${newStaffFirstName.trim()} ${newStaffLastName.trim()}`;
+
       console.log('Adding staff with:', {
         organization_id: organizationId,
-        name: newStaffName.trim(),
+        name: fullName,
         department: newStaffDepartment,
         position: newStaffPosition.trim(),
         pin: newStaffPin,
@@ -116,7 +119,7 @@ export function ManagerDashboard({
         .from('staff_members')
         .insert({
           organization_id: organizationId,
-          name: newStaffName.trim(),
+          name: fullName,
           department: newStaffDepartment,
           position: newStaffPosition.trim(),
           pin: newStaffPin,
@@ -132,7 +135,8 @@ export function ManagerDashboard({
         throw new Error(error.message || error.code || 'Unknown error');
       }
 
-      setNewStaffName('');
+      setNewStaffFirstName('');
+      setNewStaffLastName('');
       setNewStaffPosition('');
       setNewStaffPin('');
       setNewStaffDepartment('Front Office');
@@ -313,12 +317,19 @@ export function ManagerDashboard({
         {showRegistrationForm ? (
           <div className="bg-white rounded-lg shadow p-6 mb-8 border border-blue-200">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Register New Staff Member</h2>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
               <input
                 type="text"
-                value={newStaffName}
-                onChange={(e) => setNewStaffName(e.target.value)}
-                placeholder="Full Name"
+                value={newStaffFirstName}
+                onChange={(e) => setNewStaffFirstName(e.target.value)}
+                placeholder="First Name"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="text"
+                value={newStaffLastName}
+                onChange={(e) => setNewStaffLastName(e.target.value)}
+                placeholder="Last Name"
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
               <select
@@ -334,14 +345,14 @@ export function ManagerDashboard({
                 type="text"
                 value={newStaffPosition}
                 onChange={(e) => setNewStaffPosition(e.target.value)}
-                placeholder="Position (e.g., Receptionist)"
+                placeholder="Position"
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="text"
                 value={newStaffPin}
                 onChange={(e) => setNewStaffPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="PIN (4 digits)"
+                placeholder="PIN (4)"
                 maxLength={4}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-mono"
               />
@@ -349,7 +360,7 @@ export function ManagerDashboard({
                 onClick={addStaffMember}
                 className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
               >
-                Add Staff
+                Add
               </button>
             </div>
             <button
