@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { DEPARTMENTS, getDepartmentLabel } from '../utils/departments';
 
 interface StaffMember {
   id: string;
@@ -17,18 +18,6 @@ interface Session {
   score?: number;
   created_at: string;
 }
-
-const DEPARTMENTS = [
-  'Front Office',
-  'Housekeeping',
-  'Restaurant',
-  'Kitchen',
-  'Maintenance',
-  'MANAGER',
-  'GM',
-  'Concierge',
-  'Security',
-];
 
 export function ManagerDashboard({
   managerId,
@@ -51,7 +40,7 @@ export function ManagerDashboard({
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [newStaffFirstName, setNewStaffFirstName] = useState('');
   const [newStaffLastName, setNewStaffLastName] = useState('');
-  const [newStaffDepartment, setNewStaffDepartment] = useState('Front Office');
+  const [newStaffDepartment, setNewStaffDepartment] = useState('FO');
   const [newStaffPosition, setNewStaffPosition] = useState('');
   const [newStaffPin, setNewStaffPin] = useState('');
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
@@ -142,7 +131,7 @@ export function ManagerDashboard({
       setNewStaffLastName('');
       setNewStaffPosition('');
       setNewStaffPin('');
-      setNewStaffDepartment('Front Office');
+      setNewStaffDepartment('FO');
       setShowRegistrationForm(false);
       fetchData();
     } catch (error) {
@@ -293,7 +282,7 @@ export function ManagerDashboard({
             >
               <option value="all">All Departments</option>
               {DEPARTMENTS.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
+                <option key={dept.value} value={dept.value}>{dept.label}</option>
               ))}
             </select>
           </div>
@@ -341,7 +330,7 @@ export function ManagerDashboard({
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 {DEPARTMENTS.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
+                  <option key={dept.value} value={dept.value}>{dept.label}</option>
                 ))}
               </select>
               <input
@@ -386,7 +375,7 @@ export function ManagerDashboard({
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-bold text-gray-900">
-              Staff Members {departmentFilter !== 'all' && `- ${departmentFilter}`}
+              Staff Members {departmentFilter !== 'all' && `- ${getDepartmentLabel(departmentFilter as any)}`}
             </h2>
           </div>
 
@@ -408,7 +397,7 @@ export function ManagerDashboard({
                   return (
                     <tr key={member.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-gray-900 font-medium">{member.name}</td>
-                      <td className="px-6 py-4 text-gray-600">{member.department}</td>
+                      <td className="px-6 py-4 text-gray-600">{getDepartmentLabel(member.department as any)}</td>
                       <td className="px-6 py-4 text-gray-600">{member.position}</td>
                       <td className="px-6 py-4 text-center font-semibold text-gray-900">{stats.sessions}</td>
                       <td className={`px-6 py-4 text-center font-semibold ${
@@ -489,7 +478,7 @@ export function ManagerDashboard({
             </table>
           ) : (
             <div className="p-8 text-center text-gray-600">
-              <p>No staff members {departmentFilter !== 'all' && `in ${departmentFilter}`}</p>
+              <p>No staff members {departmentFilter !== 'all' && `in ${getDepartmentLabel(departmentFilter as any)}`}</p>
             </div>
           )}
         </div>
