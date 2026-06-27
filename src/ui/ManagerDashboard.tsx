@@ -642,18 +642,31 @@ export function ManagerDashboard({
 
         {/* Department Filter & Stats */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">Filter by Department</h2>
-            <select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Filter by Department:</h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <button
+              onClick={() => setDepartmentFilter('all')}
+              className={`px-4 py-2 rounded-lg transition font-medium ${
+                departmentFilter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+              }`}
             >
-              <option value="all">All Departments</option>
-              {DEPARTMENTS.map(dept => (
-                <option key={dept.value} value={dept.value}>{dept.label}</option>
-              ))}
-            </select>
+              All Departments
+            </button>
+            {DEPARTMENTS.map(dept => (
+              <button
+                key={dept.value}
+                onClick={() => setDepartmentFilter(dept.value)}
+                className={`px-4 py-2 rounded-lg transition font-medium ${
+                  departmentFilter === dept.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                }`}
+              >
+                {dept.label}
+              </button>
+            ))}
           </div>
 
           {deptStats && (
