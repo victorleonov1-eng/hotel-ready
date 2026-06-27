@@ -145,8 +145,8 @@ function AppContent() {
     }
   }
 
-  // Show Company Landing Page for logged-in organization users
-  if (user && profile?.organization_id && !adminPinVerified) {
+  // Show Company Landing Page for logged-in organization users (unless they've selected a screen)
+  if (user && profile?.organization_id && !adminPinVerified && (screen.type === 'login' || (screen.type as any) === undefined)) {
     return (
       <CompanyLandingPage
         organizationName={organizationName}
