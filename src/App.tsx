@@ -45,6 +45,7 @@ function AppContent() {
   const [staffLoginMode, setStaffLoginMode] = useState(false);
   const [managerOrgId, setManagerOrgId] = useState<string | null>(null);
   const [managerPin, setManagerPin] = useState<string>('1234');
+  const [organizationName, setOrganizationName] = useState<string>('Hotel');
 
   const handleManagerView = () => {
     if (localProfile) {
@@ -74,9 +75,13 @@ function AppContent() {
         try {
           const { data: org } = await supabase
             .from('organizations')
-            .select('pin_expires_at, manager_pin')
+            .select('name, pin_expires_at, manager_pin')
             .eq('id', profile.organization_id)
             .single();
+
+          if (org?.name) {
+            setOrganizationName(org.name);
+          }
 
           if (org?.pin_expires_at) {
             const expiryDate = new Date(org.pin_expires_at);
@@ -144,7 +149,7 @@ function AppContent() {
   if (user && profile?.organization_id && !adminPinVerified) {
     return (
       <CompanyLandingPage
-        organizationName={profile.organization_name || 'Hotel'}
+        organizationName={organizationName}
         onStaffTraining={() => setScreen({ type: 'staff-training' })}
         onManagerDashboard={() => setScreen({ type: 'manager-pin' })}
         onLogout={handleLogout}
@@ -311,7 +316,7 @@ function AppContent() {
             managerId={managerStaffId || ''}
             managerName={localProfile ? `${localProfile.firstName} ${localProfile.lastName}` : 'Manager'}
             organizationId={managerOrgId}
-            organizationName={profile?.organization_name || 'Organization'}
+            organizationName={organizationName}
             onBack={() => {
               setManagerStaffId(null);
               setManagerOrgId(null);
