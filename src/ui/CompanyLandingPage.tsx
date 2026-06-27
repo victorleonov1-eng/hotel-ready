@@ -14,11 +14,11 @@ export function CompanyLandingPage({
       {/* Header */}
       <div className="bg-red-700 text-white px-8 py-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold">HOTEL Ready</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-red-100">{organizationName}</span>
+        <div className="flex items-center gap-6">
+          <span className="text-red-100 text-right whitespace-normal max-w-xs">{organizationName}</span>
           <button
             onClick={onLogout}
-            className="bg-red-800 hover:bg-red-900 px-6 py-2 rounded transition text-sm"
+            className="bg-red-800 hover:bg-red-900 px-6 py-2 rounded transition text-sm flex-shrink-0"
           >
             Sign Out
           </button>
