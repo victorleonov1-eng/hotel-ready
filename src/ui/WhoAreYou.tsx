@@ -25,19 +25,6 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
   const [pin, setPin] = useState('');
   const [department, setDepartment] = useState<Department>('FO');
 
-  const loadDemo = () => {
-    setFirstName('Demo');
-    setLastName('User');
-    setPin('1234');
-    setDepartment('FO');
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('demo')) {
-      loadDemo();
-    }
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,12 +116,6 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
         </button>
       </form>
 
-      <button
-        onClick={loadDemo}
-        className="mt-4 text-xs text-gray-500 hover:text-gray-700 underline"
-      >
-        Load Demo Data
-      </button>
     </div>
   );
 }
