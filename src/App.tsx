@@ -187,11 +187,31 @@ function AppContent() {
   }
 
   // User is logged in - show staff training interface for now
-  function handleLogin(firstName: string, lastName: string, pin: string, department: any) {
-    const p = loginOrCreateProfile(firstName, lastName, pin, '', department);
-    if (p) {
-      setLocalProfile(p);
-      setScreen({ type: 'practice-selector' });
+  async function handleLogin(firstName: string, lastName: string, pin: string, department: any) {
+    try {
+      // Look up staff member in database to get their registered department
+      const { data: staffMember, error } = await supabase
+        .from('staff_members')
+        .select('department')
+        .eq('name', `${firstName} ${lastName}`)
+        .eq('pin', pin)
+        .single();
+
+      if (error || !staffMember) {
+        alert('Staff member not found. Please check your name and PIN.');
+        return;
+      }
+
+      // Use the registered department, not the one selected during login
+      const registeredDepartment = staffMember.department;
+      const p = loginOrCreateProfile(firstName, lastName, pin, '', registeredDepartment);
+      if (p) {
+        setLocalProfile(p);
+        setScreen({ type: 'practice-selector' });
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('An error occurred during login. Please try again.');
     }
   }
 
