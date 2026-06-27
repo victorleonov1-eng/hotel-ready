@@ -36,7 +36,6 @@ export function CompanyLandingPage({
           </button>
         </div>
       </div>
-    </div>
   );
 }
 
