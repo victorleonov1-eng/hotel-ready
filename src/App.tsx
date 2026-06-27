@@ -146,7 +146,7 @@ function AppContent() {
   }
 
   // Show Company Landing Page for logged-in organization users (unless they've selected a screen)
-  if (user && profile?.organization_id && !adminPinVerified && (screen.type === 'login' || (screen.type as any) === undefined)) {
+  if (user && profile?.organization_id && !adminPinVerified && (screen.type === 'login' || screen.type === 'company-landing')) {
     return (
       <CompanyLandingPage
         organizationName={organizationName}
