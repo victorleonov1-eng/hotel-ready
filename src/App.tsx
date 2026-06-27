@@ -253,7 +253,7 @@ function AppContent() {
           <WhoAreYou
             onSubmit={handleLogin}
             onSignOut={() => {
-              setStaffLoginMode(false);
+              setScreen({ type: 'company-landing' });
             }}
           />
         )}
