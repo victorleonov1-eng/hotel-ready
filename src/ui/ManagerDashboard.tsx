@@ -93,8 +93,13 @@ export function ManagerDashboard({
   };
 
   const addStaffMember = async () => {
-    if (!newStaffName.trim() || !newStaffDepartment || !newStaffPosition.trim() || newStaffPin.length !== 4 || !organizationId) {
+    if (!newStaffName.trim() || !newStaffDepartment || !newStaffPosition.trim() || newStaffPin.length !== 4) {
       alert('Please fill all fields. PIN must be 4 digits.');
+      return;
+    }
+
+    if (!organizationId) {
+      alert('Error: Organization ID not found. Please go back and try again.');
       return;
     }
 
@@ -109,7 +114,10 @@ export function ManagerDashboard({
           pin: newStaffPin,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
 
       setNewStaffName('');
       setNewStaffPosition('');
@@ -119,7 +127,8 @@ export function ManagerDashboard({
       fetchData();
     } catch (error) {
       console.error('Error adding staff:', error);
-      alert('Failed to add staff member');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add staff member';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
