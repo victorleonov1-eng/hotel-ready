@@ -209,7 +209,7 @@ export function ManagerDashboard({
 
       setShowManagerPinReset(false);
       setManagerNewPin('');
-      alert(`Manager PIN reset to ${pinValue}`);
+      alert(`Manager PIN reset to ${pinValue}. Sign out and log back in to use the new PIN.`);
     } catch (error) {
       console.error('Error resetting manager PIN:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to reset PIN';
