@@ -244,21 +244,13 @@ export function AuthScreen({ onStaffLogin }: { onStaffLogin?: () => void }) {
               </p>
             </div>
 
-            <div className="border-t border-gray-200 pt-4 space-y-2">
+            <div className="border-t border-gray-200 pt-4">
               <button
                 onClick={() => setShowAdminPin(true)}
                 className="w-full bg-gray-700 text-white font-semibold py-2 rounded-lg hover:bg-gray-800 transition"
               >
                 🔑 Admin Dashboard
               </button>
-              {onStaffLogin && (
-                <button
-                  onClick={onStaffLogin}
-                  className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  👤 Staff Training
-                </button>
-              )}
             </div>
           </div>
         </div>
