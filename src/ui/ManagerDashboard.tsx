@@ -40,7 +40,7 @@ export function ManagerDashboard({
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [newStaffFirstName, setNewStaffFirstName] = useState('');
   const [newStaffLastName, setNewStaffLastName] = useState('');
-  const [newStaffDepartment, setNewStaffDepartment] = useState('FO');
+  const [newStaffDepartment, setNewStaffDepartment] = useState('Front Office');
   const [newStaffPosition, setNewStaffPosition] = useState('');
   const [newStaffPin, setNewStaffPin] = useState('');
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
@@ -133,7 +133,7 @@ export function ManagerDashboard({
       setNewStaffLastName('');
       setNewStaffPosition('');
       setNewStaffPin('');
-      setNewStaffDepartment('FO');
+      setNewStaffDepartment('Front Office');
       setShowRegistrationForm(false);
       fetchData();
     } catch (error) {
