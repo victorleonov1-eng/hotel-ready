@@ -350,7 +350,7 @@ function AppContent() {
           <AdminPinEntry
             onSubmit={() => setScreen({ type: 'admin' })}
             onBack={() => setScreen({ type: 'practice-selector' })}
-            correctPin="8739"
+            correctPin={import.meta.env.VITE_ADMIN_PIN || '0000'}
           />
         )}
 

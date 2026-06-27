@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { logLoginAttempt } from '../lib/auditLog';
+import { isLoginRateLimited, recordFailedLoginAttempt, clearLoginAttempts } from '../lib/rateLimiter';
 
 export type UserRole = 'staff' | 'manager' | 'admin';
 
@@ -72,8 +74,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    // Check rate limiting
+    const rateLimit = isLoginRateLimited(email);
+    if (rateLimit.limited) {
+      const error = new Error(
+        `Too many login attempts. Please try again in ${rateLimit.minutesRemaining} minute(s).`
+      );
+      await logLoginAttempt(email, false);
+      throw error;
+    }
+
+    // Attempt login
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+
+    if (error) {
+      recordFailedLoginAttempt(email);
+      await logLoginAttempt(email, false);
+      throw error;
+    }
+
+    // Success - clear rate limit counter
+    clearLoginAttempts(email);
+    await logLoginAttempt(email, true);
   };
 
   const register = async (email: string, password: string, fullName: string, orgName: string) => {
