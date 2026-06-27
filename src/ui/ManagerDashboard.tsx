@@ -141,8 +141,10 @@ export function ManagerDashboard({
     }
   };
 
-  const resetPin = async (staffId: string) => {
-    if (newPin.length !== 4) {
+  const resetPin = async (staffId: string, pinValue?: string) => {
+    const pinToSet = pinValue || newPin;
+
+    if (pinToSet.length !== 4) {
       alert('PIN must be 4 digits.');
       return;
     }
@@ -150,7 +152,7 @@ export function ManagerDashboard({
     try {
       const { error } = await supabase
         .from('staff_members')
-        .update({ pin: newPin })
+        .update({ pin: pinToSet })
         .eq('id', staffId);
 
       if (error) throw error;
@@ -158,7 +160,7 @@ export function ManagerDashboard({
       setResetPinId(null);
       setNewPin('');
       fetchData();
-      alert('PIN reset successfully');
+      alert(`PIN reset to ${pinToSet}`);
     } catch (error) {
       console.error('Error resetting PIN:', error);
       alert('Failed to reset PIN');
@@ -458,6 +460,12 @@ export function ManagerDashboard({
                               className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
                             >
                               Reset PIN
+                            </button>
+                            <button
+                              onClick={() => resetPin(member.id, '0000')}
+                              className="text-green-600 hover:text-green-700 font-semibold text-sm"
+                            >
+                              Reset to 0000
                             </button>
                             {deleteConfirmId === member.id ? (
                               <div className="inline-block">
