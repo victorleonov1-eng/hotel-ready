@@ -57,9 +57,9 @@ export function WhoAreYou({ onSubmit, error, onSignOut }: LoginProps) {
       {onSignOut && (
         <button
           onClick={onSignOut}
-          className="absolute top-4 right-4 text-sm text-gray-500 hover:text-gray-700 underline"
+          className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-700 underline"
         >
-          ← Back to Login
+          ← Back
         </button>
       )}
       <h2 className="text-2xl font-bold text-crimson-dark mb-2">Welcome to HOTEL Ready</h2>
