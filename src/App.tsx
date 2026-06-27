@@ -220,7 +220,7 @@ function AppContent() {
   async function handleLogout() {
     await logout();
     setLocalProfile(null);
-    setStaffLoginMode(false);
+    setStaffLoginMode(true);
     setScreen({ type: 'login' });
   }
 
