@@ -32,7 +32,6 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
   const [started, setStarted] = useState(false);
   const [listening, setListening] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const [usedCards, setUsedCards] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState<AnswerOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -201,7 +200,6 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
       const data = await res.json();
       setOptions(Array.isArray(data) ? data : data.options || []);
       setShowOptions(true);
-      setUsedCards(true);
 
       // Increment stuck cards and show feedback
       const newCount = stuckCardsUsed + 1;
@@ -352,7 +350,6 @@ export function RolePlay({ scenario, onDone, onBack, bestTime }: Props) {
           setScoreResult(null);
           setStarted(false);
           setSeconds(0);
-          setUsedCards(false);
           setStuckCardsUsed(0);
           setFeedbackMessage('');
         }}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Department } from '../content/types';
 import { DEPARTMENTS } from '../utils/departments';
 

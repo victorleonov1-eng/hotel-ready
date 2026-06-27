@@ -42,7 +42,6 @@ export function CompanyDashboard({ onLogout }: { onLogout: () => void }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'analytics' | 'properties' | 'staff'>('analytics');
   const [newPropertyName, setNewPropertyName] = useState('');
-  const [newStaffName, setNewStaffName] = useState('');
   const [newStaffProperty, setNewStaffProperty] = useState('');
   const [newStaffDepartment, setNewStaffDepartment] = useState('Front Office');
 
@@ -159,7 +158,6 @@ export function CompanyDashboard({ onLogout }: { onLogout: () => void }) {
         });
 
       if (error) throw error;
-      setNewStaffName('');
       setNewStaffProperty('');
       setNewStaffDepartment('Front Office');
       fetchCompanyData();

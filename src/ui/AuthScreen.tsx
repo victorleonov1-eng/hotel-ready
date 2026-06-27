@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AdminPinEntry } from './AdminPinEntry';
 
-export function AuthScreen({ onStaffLogin }: { onStaffLogin?: () => void }) {
+export function AuthScreen({  }: { onStaffLogin?: () => void }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState(() => {
     return localStorage.getItem('lastEmail') || '';

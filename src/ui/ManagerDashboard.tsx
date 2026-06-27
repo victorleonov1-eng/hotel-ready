@@ -20,14 +20,12 @@ interface Session {
 }
 
 export function ManagerDashboard({
-  managerId,
   managerName,
   organizationId,
   organizationName,
   userId,
   onBack
 }: {
-  managerId: string;
   managerName: string;
   organizationId?: string;
   organizationName?: string;
@@ -270,16 +268,6 @@ export function ManagerDashboard({
       filtered.some(staff => staff.id === s.staff_id)
     );
     return { staff: filtered, sessions: filteredSessions };
-  };
-
-  const getOrganizationStats = () => {
-    const totalStaff = staffMembers.length;
-    const totalSessions = sessions.length;
-    const avgScore = sessions.length > 0
-      ? Math.round(sessions.reduce((sum, s) => sum + (s.score || 0), 0) / sessions.length)
-      : 0;
-
-    return { totalStaff, totalSessions, avgScore };
   };
 
   const getMetricsForFilter = (dept?: string | null) => {

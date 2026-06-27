@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -9,13 +9,6 @@ interface Organization {
   created_at: string;
   pin_expires_at?: string;
   manager_pin?: string;
-}
-
-interface Property {
-  id: string;
-  organization_id: string;
-  name: string;
-  created_at: string;
 }
 
 interface Session {
@@ -50,9 +43,8 @@ interface StaffResult {
 }
 
 export function AdminDashboard({ onBack }: { onBack: () => void }) {
-  const { user } = useAuth();
+  useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [userProfiles, setUserProfiles] = useState<Map<string, UserProfile>>(new Map());
@@ -61,9 +53,6 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
   const [pinExpiryDate, setPinExpiryDate] = useState<string>('');
   const [showExpiryPicker, setShowExpiryPicker] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'analytics' | 'properties'>('analytics');
-  const [newPropertyName, setNewPropertyName] = useState('');
-  const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
   const [showManagerPinReset, setShowManagerPinReset] = useState(false);
   const [newManagerPin, setNewManagerPin] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
@@ -93,13 +82,6 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
 
         const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
         setUserProfiles(profileMap);
-
-        const { data: props } = await supabase
-          .from('properties')
-          .select('*')
-          .in('organization_id', orgs.map(o => o.id));
-
-        setProperties(props || []);
 
         // Fetch staff members for all organizations
         const { data: staff } = await supabase
@@ -164,42 +146,6 @@ export function AdminDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const addProperty = async () => {
-    if (!selectedOrgId || !newPropertyName.trim()) return;
-
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .insert({
-          organization_id: selectedOrgId,
-          name: newPropertyName,
-        });
-
-      if (error) throw error;
-      setNewPropertyName('');
-      fetchAllData();
-    } catch (error) {
-      console.error('Error adding property:', error);
-      alert('Failed to add property');
-    }
-  };
-
-  const deleteProperty = async (propertyId: string) => {
-    if (!confirm('Delete this property? This cannot be undone.')) return;
-
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', propertyId);
-
-      if (error) throw error;
-      fetchAllData();
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      alert('Failed to delete property');
-    }
-  };
 
   const resetManagerPin = async (pinValue?: string) => {
     if (!selectedOrgId) return;

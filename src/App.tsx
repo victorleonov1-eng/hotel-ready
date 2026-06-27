@@ -11,7 +11,6 @@ import { ManagerView } from './ui/ManagerView';
 import { AdminDashboard } from './ui/AdminDashboard';
 import { AdminPinEntry } from './ui/AdminPinEntry';
 import { ManagerPinEntry } from './ui/ManagerPinEntry';
-import { CompanyDashboard } from './ui/CompanyDashboard';
 import { CompanyLandingPage } from './ui/CompanyLandingPage';
 import { ManagerDashboard } from './ui/ManagerDashboard';
 import { loginOrCreateProfile, recordAttempt } from './state/profiles';
@@ -329,7 +328,6 @@ function AppContent() {
 
         {screen.type === 'manager-dashboard' && (managerStaffId || managerOrgId) && (
           <ManagerDashboard
-            managerId={managerStaffId || ''}
             managerName={localProfile ? `${localProfile.firstName} ${localProfile.lastName}` : 'Manager'}
             organizationId={managerOrgId || undefined}
             organizationName={organizationName}
