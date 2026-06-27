@@ -331,7 +331,7 @@ function AppContent() {
           <ManagerDashboard
             managerId={managerStaffId || ''}
             managerName={localProfile ? `${localProfile.firstName} ${localProfile.lastName}` : 'Manager'}
-            organizationId={managerOrgId}
+            organizationId={managerOrgId || undefined}
             organizationName={organizationName}
             userId={user?.id}
             onBack={() => {

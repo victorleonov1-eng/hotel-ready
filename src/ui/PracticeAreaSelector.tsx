@@ -9,7 +9,7 @@ type PracticeSelectorProps = {
 };
 
 export function PracticeAreaSelector({ packs, profile, onSelect, onLogout, onManagerView }: PracticeSelectorProps) {
-  const isManagerOrGM = profile.department === 'GM' || profile.department === 'MANAGER';
+  const isManagerOrGM = profile.department === 'General Manager' || profile.department === 'Manager';
 
   const matchesDepartment = (packDept: string): boolean => {
     if (isManagerOrGM) return true;

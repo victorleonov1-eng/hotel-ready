@@ -8,6 +8,7 @@ interface Organization {
   admin_id: string;
   created_at: string;
   pin_expires_at?: string;
+  manager_pin?: string;
 }
 
 interface Property {

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { loginOrCreateProfile } from '../state/profiles';
 import type { Department } from '../content/types';
 
-const VALID_DEPARTMENTS: Department[] = ['FO', 'F&B', 'HK', 'FIN', 'KITCHEN', 'TECH', 'MANAGER', 'GM', 'OTHER'];
+const VALID_DEPARTMENTS: Department[] = ['Front Office', 'Food & Beverage', 'Housekeeping', 'Finance', 'Kitchen', 'Technical / Maintenance', 'Manager', 'General Manager', 'Other'];
 
 type ImportStaffDialogProps = {
   onClose: () => void;
