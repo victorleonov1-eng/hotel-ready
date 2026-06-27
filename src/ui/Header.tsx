@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 
-const HOTEL_NAME = 'Hotel Name';
-
 type HeaderProps = {
   onMuteToggle?: (muted: boolean) => void;
   muted?: boolean;
   onLogout?: () => void;
+  companyName?: string;
 };
 
-export function Header({ onMuteToggle, muted = false, onLogout }: HeaderProps) {
+export function Header({ onMuteToggle, muted = false, onLogout, companyName = 'Hotel Name' }: HeaderProps) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -27,7 +26,7 @@ export function Header({ onMuteToggle, muted = false, onLogout }: HeaderProps) {
 
       <div className="flex items-center gap-4">
         <div className="text-center text-sm">
-          <div className="font-semibold">{HOTEL_NAME}</div>
+          <div className="font-semibold">{companyName}</div>
           <div className="text-xs opacity-90">
             {dateStr} {timeStr}
           </div>

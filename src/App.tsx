@@ -230,7 +230,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header muted={muted} onMuteToggle={setMuted} onLogout={user ? handleLogout : undefined} />
+      <Header muted={muted} onMuteToggle={setMuted} onLogout={user ? handleLogout : undefined} companyName={organizationName} />
 
       <main className="flex-1">
         {screen.type === 'staff-training' && !localProfile && (
