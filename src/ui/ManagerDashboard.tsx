@@ -172,14 +172,23 @@ export function ManagerDashboard({
         .delete()
         .eq('id', staffId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase delete error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
 
       setDeleteConfirmId(null);
       fetchData();
       alert('Staff member deleted');
     } catch (error) {
       console.error('Error deleting staff:', error);
-      alert('Failed to delete staff member');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete staff member';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
