@@ -148,12 +148,13 @@ function AppContent() {
   // Show Company Landing Page for logged-in organization users (unless they've selected a screen)
   if (user && profile?.organization_id && !adminPinVerified && (screen.type === 'login' || screen.type === 'company-landing')) {
     return (
-      <CompanyLandingPage
-        organizationName={organizationName}
-        onStaffTraining={() => setScreen({ type: 'staff-training' })}
-        onManagerDashboard={() => setScreen({ type: 'manager-pin' })}
-        onLogout={handleLogout}
-      />
+      <div className="min-h-screen bg-white flex flex-col">
+        <Header muted={muted} onMuteToggle={setMuted} onLogout={handleLogout} companyName={organizationName} />
+        <CompanyLandingPage
+          onStaffTraining={() => setScreen({ type: 'staff-training' })}
+          onManagerDashboard={() => setScreen({ type: 'manager-pin' })}
+        />
+      </div>
     );
   }
 

@@ -1,60 +1,12 @@
-import { useState, useEffect } from 'react';
-
 export function CompanyLandingPage({
-  organizationName,
   onStaffTraining,
-  onManagerDashboard,
-  onLogout
+  onManagerDashboard
 }: {
-  organizationName: string;
   onStaffTraining: () => void;
   onManagerDashboard: () => void;
-  onLogout: () => void;
 }) {
-  const [currentTime, setCurrentTime] = useState<string>('');
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-red-700 text-white px-8 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-8">
-          <h1 className="text-3xl font-bold">HOTEL Ready</h1>
-          <div className="text-red-100 text-sm">
-            <p>{currentTime}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-6 flex-shrink-0">
-          <div className="text-right">
-            <p className="text-red-100 text-sm font-semibold">{organizationName}</p>
-          </div>
-          <button
-            onClick={onLogout}
-            className="bg-red-800 hover:bg-red-900 px-6 py-2 rounded transition text-sm"
-          >
-            Sign Out
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4">
+    <div className="flex-1 flex flex-col items-center justify-center px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Welcome</h2>
           <p className="text-xl text-gray-600">Select what you'd like to do</p>
@@ -87,3 +39,4 @@ export function CompanyLandingPage({
     </div>
   );
 }
+
