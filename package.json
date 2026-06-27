@@ -2,6 +2,7 @@
   "name": "hotel-ready",
   "private": true,
   "version": "2.0.0",
+  "buildDate": "2026-06-27T22:03:00Z",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx --watch server/index.ts\"",
