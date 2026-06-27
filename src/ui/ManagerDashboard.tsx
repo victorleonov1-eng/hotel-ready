@@ -170,19 +170,41 @@ export function ManagerDashboard({
   const resetManagerPin = async (newPinValue?: string) => {
     const pinValue = newPinValue || managerNewPin;
 
+    console.log('Resetting manager PIN to:', pinValue);
+    console.log('Organization ID:', organizationId);
+
     if (pinValue.length !== 4) {
       alert('PIN must be 4 digits.');
       return;
     }
 
     try {
-      if (organizationId) {
-        const { error } = await supabase
-          .from('organizations')
-          .update({ manager_pin: pinValue })
-          .eq('id', organizationId);
+      if (!organizationId) {
+        alert('Error: Organization ID not found');
+        return;
+      }
 
-        if (error) throw error;
+      const { data, error } = await supabase
+        .from('organizations')
+        .update({ manager_pin: pinValue })
+        .eq('id', organizationId)
+        .select();
+
+      console.log('Update response:', { data, error });
+
+      if (error) {
+        console.error('Supabase error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        alert('Failed to reset manager PIN - no rows updated');
+        return;
       }
 
       setShowManagerPinReset(false);
@@ -190,7 +212,8 @@ export function ManagerDashboard({
       alert(`Manager PIN reset to ${pinValue}`);
     } catch (error) {
       console.error('Error resetting manager PIN:', error);
-      alert('Failed to reset PIN');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reset PIN';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
