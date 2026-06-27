@@ -188,7 +188,6 @@ export function ManagerDashboard({
         .from('staff_members')
         .delete()
         .eq('id', staffId)
-        .eq('organization_id', organizationId)
         .select();
 
       console.log('Delete response:', { data, error });
